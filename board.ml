@@ -1,5 +1,4 @@
 open Graphics
-open Async
 
 type direction = Left | Right | Up | Down | None
 type wall = {x: int; y: int; dir: direction}
@@ -73,7 +72,6 @@ let draw_everything ghost walls players ghost_wall play=
   moveto 400 890;
   let player = List.nth players play in
   set_color (player.color);
-  set_text_size 25;
   draw_string ("Current Player: "^ string_of_int(play));
   synchronize graph
 
