@@ -26,6 +26,16 @@ type move =
   | Move of loc
   | PlaceWall of wall
 
+let print_game t =
+  Array.iter (fun row ->
+    Array.iter (function
+      | NoWall    -> print_string ". "
+      | Wall      -> print_string "+ "
+      | Space     -> print_string "  "
+      | Player id -> print_int id; print_char ' '
+    ) row; print_newline()
+  ) t.board
+
 let create_board size =
   let rep_size = size * 2 - 1 in
 
@@ -51,3 +61,5 @@ let ai_move board player_id =
 
 let board_from_file s =
   failwith "TODO"
+
+let _ = print_game (create_board 7)
