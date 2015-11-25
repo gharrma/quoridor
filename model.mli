@@ -1,3 +1,14 @@
+(* Player id. A two-player game would have ids of 0 and 1. *)
+type id = int
+
+(* The contents of a single board space *)
+type board_object =
+  | Wall  | NoWall
+  | Space | Player of id
+
+(** A position type for a location on board *)
+type loc = (int * int)
+
 (** A game state.
   * Walls for an 8x8 board would only be 7x7 (in betweeen spaces) so location
   * for top left wall layout:
@@ -18,15 +29,10 @@
   * Coords for POS 2 -> (2,0)
   * Coords for POS 3 -> (2,0)
   *)
-type t
-
-(* The contents of a single board space *)
-type board_object =
-  | Wall  | NoWall
-  | Space | Player
-
-(** A position type for a location on board *)
-type loc = (int * int)
+type t = {
+  board : board_object array array;
+  players : loc array
+}
 
 (** A position type for a wall (list of segment coordinates) *)
 type wall = loc list
@@ -40,11 +46,11 @@ type move =
 val create_board : int -> t
 
 (** Create a board from a JSON game save. *)
-val create_board_from_file : string -> t
+val board_from_file : string -> t
 
-(** Validate a movement or wall placement by a player, returns if move is 
-  * possible and the resulting board state *)
-val validate_move : move -> t -> bool * t
+(** [validate_move player_id move board] validates a movement or wall placement
+    by a player, returning whether the move succeeded and updated the board. *)
+val validate_move : int -> move -> t -> bool
 
-(** Request a move from the AI based upon board state, return updated board *)
-val request_ai_move : t -> t
+(** [ai_move player_id board] requests a move from the AI. *)
+val ai_move : int -> t -> t
