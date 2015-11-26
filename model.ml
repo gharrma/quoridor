@@ -17,7 +17,7 @@ type loc = (int * int)
 
 type t = {
   board : board_object array array;
-  players : loc array
+  players : (loc * int) array
 }
 
 type wall = loc list
@@ -38,14 +38,13 @@ let print_game t =
 
 let create_board size =
   let rep_size = size * 2 - 1 in
-
-  let p0_pos = (rep_size / 2, 0) in
-  let p1_pos = (rep_size / 2, rep_size - 1) in
+  let p0_pos = ((rep_size / 2, 0), 10) in
+  let p1_pos = ((rep_size / 2, rep_size - 1), 10) in
   let players = [| p0_pos; p1_pos |] in
 
   let fill_space y x =
-         if (x, y) = p0_pos then Player 0
-    else if (x, y) = p1_pos then Player 1
+         if (x, y) = fst p0_pos then Player 0
+    else if (x, y) = fst p1_pos then Player 1
     else if x mod 2 = 0 && y mod 2 = 0 then Space
     else NoWall in
   let fill_row y = Array.init rep_size (fill_space y) in
@@ -68,9 +67,9 @@ let reflect a b =
   let (ya, xa) = b in let (yb, xb) = b in (2*yb - ya, 2*xb - xa)
 
 let validate_move player_id move board =
-  let (py, px) = (board.players).(player_id) in
+  let ((py, px), nwalls) = (board.players).(player_id) in
   match move with
-  |Move(y, x) -> begin
+  |Move(y, x) -> let canmove = begin
     match board.board.(y).(x) with
     |Space -> begin
       if(abs(px - x) + abs(py - y) == 2) then
@@ -101,8 +100,13 @@ let validate_move player_id move board =
       |_ -> false
     end
     |_ -> false (* cannot move somewhere not a space *)
-  end
-  |PlaceWall wlist -> begin
+  end in if (canmove) then begin (* update the board *)
+    (board.board.(py).(px) <- Space);
+    (board.board.(y).(x) <- Player player_id);
+    (board.players.(player_id) <- ((y, x), nwalls));
+    canmove end else false
+  |PlaceWall wlist -> let canmove = begin
+    if (nwalls == 0) then false else
     let rec canplace = function
     |[] -> true
     |(y, x)::tl -> not (haswall board y x) && canplace tl in
@@ -123,7 +127,13 @@ let validate_move player_id move board =
        then visit mark top bot (y + dy, x + dx) else () done
     in (visit mark top bot (py, px));
     if player_id = 0 then !bot else !top
-  end
+    end in if (canmove) then begin (* update the board *)
+    let rec updatewalls = function
+    |[] -> ()
+    |(y, x)::tl -> (board.board.(y).(x) <- Wall); updatewalls tl in
+    (updatewalls wlist);
+    (board.players.(player_id) <- ((py, px), nwalls - 1));
+    canmove end else false
 
 let ai_move board player_id =
   failwith "TODO"

@@ -3,8 +3,8 @@ type id = int
 
 (* The contents of a single board space *)
 type board_object =
-  | Wall  | NoWall
-  | Space | Player of id
+    | Wall  | NoWall
+    | Space | Player of id
 
 (** A position type for a location on board *)
 type loc = (int * int)
@@ -28,10 +28,10 @@ type loc = (int * int)
   * Coords for POS 1 -> (0,0)
   * Coords for POS 2 -> (2,0)
   * Coords for POS 3 -> (2,0)
-  *)
+*)
 type t = {
   board : board_object array array;
-  players : loc array
+  players : (loc * int) array
 }
 
 (** A position type for a wall (list of segment coordinates) *)
@@ -39,8 +39,8 @@ type wall = loc list
 
 (* Represents a single move that a player is choosing to make *)
 type move =
-  | Move of loc
-  | PlaceWall of wall
+    | Move of loc
+    | PlaceWall of wall
 
 (** Create empty board state that is n * n in size (Square board) *)
 val create_board : int -> t
