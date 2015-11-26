@@ -64,7 +64,7 @@ let haswall board y x =
 
 (* Returns the point in the plane corresponding to the reflection of a over b *)
 let reflect a b =
-  let (ya, xa) = b in let (yb, xb) = b in (2*yb - ya, 2*xb - xa)
+  let (ya, xa) = a in let (yb, xb) = b in (2*yb - ya, 2*xb - xa)
 
 let validate_move player_id move board =
   let ((py, px), nwalls) = (board.players).(player_id) in
