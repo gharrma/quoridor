@@ -53,8 +53,40 @@ let create_board size =
 
   { board; players }
 
-let validate_move move board player_id =
-  failwith "TODO"
+let haswall board y x =
+  match board.(y).(x) with
+  |Wall -> true
+  |_ -> false
+
+let validate_move player_id move board =
+  let (py, px) = (board.players).(player_id) in
+  match move with
+  |Move(y, x) -> begin
+    match board.(y).(x) with
+    |Space -> begin
+      if(abs(px - x) + abs(py - y) == 2) then
+        not haswall board ((py + y)/2) ((px + x)/2)
+    else if(abs(px - x) + abs(py - y) > 4) then false (* else dist = 4 *)
+    else let (my, mx) = ((py + y)/2, (px + x)/2) in
+    if (px == x || py == y) then
+    match board.(my).(mx) with
+      |Player -> not haswall board ((my + py)/2) ((mx + px)/2) and
+                 not haswall board ((my + y)/2) ((mx + x)/2)
+      |_ -> false
+    else (* diagonal move *)
+    let can1 = not haswall board py mx and
+               not haswall board my x in
+    let can2 = not haswall board my px and
+               not haswall board y mx in
+    match (board.(py).(x), board.(y).(px)) with
+      |(Player, Player) -> can1 || can2
+      |(Player, _) -> can1
+      |(_, Player) -> can2
+      |_ -> false
+    end
+    |_ -> false (* cannot move somewhere not a space *)
+  end
+  |PlaceWall wlist -> (* after thanksgiving dinner :) *)
 
 let ai_move board player_id =
   failwith "TODO"
