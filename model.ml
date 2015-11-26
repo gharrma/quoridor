@@ -53,40 +53,77 @@ let create_board size =
 
   { board; players }
 
+(* Returns whether a location is unacessible, either because it has a wall,
+ is not a valid board location or is occupied by a player. *)
 let haswall board y x =
-  match board.(y).(x) with
+  let n = Array.length board.board in
+  if(y < 0 || y >= n || x < 0 || x >= n) then true else
+  match (board.board).(y).(x) with
   |Wall -> true
+  |Player i -> true
   |_ -> false
+
+(* Returns the point in the plane corresponding to the reflection of a over b *)
+let reflect a b =
+  let (ya, xa) = b in let (yb, xb) = b in (2*yb - ya, 2*xb - xa)
 
 let validate_move player_id move board =
   let (py, px) = (board.players).(player_id) in
   match move with
   |Move(y, x) -> begin
-    match board.(y).(x) with
+    match board.board.(y).(x) with
     |Space -> begin
       if(abs(px - x) + abs(py - y) == 2) then
-        not haswall board ((py + y)/2) ((px + x)/2)
+        not (haswall board ((py + y)/2) ((px + x)/2))
     else if(abs(px - x) + abs(py - y) > 4) then false (* else dist = 4 *)
     else let (my, mx) = ((py + y)/2, (px + x)/2) in
-    if (px == x || py == y) then
-    match board.(my).(mx) with
-      |Player -> not haswall board ((my + py)/2) ((mx + px)/2) and
-                 not haswall board ((my + y)/2) ((mx + x)/2)
-      |_ -> false
+    if (px == x || py == y) then (* jumping *)
+      haswall board my mx &&
+      not (haswall board ((my + py)/2) ((mx + px)/2)) &&
+      not (haswall board ((my + y)/2) ((mx + x)/2))
     else (* diagonal move *)
-    let can1 = not haswall board py mx and
-               not haswall board my x in
-    let can2 = not haswall board my px and
-               not haswall board y mx in
-    match (board.(py).(x), board.(y).(px)) with
-      |(Player, Player) -> can1 || can2
-      |(Player, _) -> can1
-      |(_, Player) -> can2
+    let can1 = not (haswall board py mx) &&
+               not (haswall board my x) &&
+               ((let (wy, wx) = reflect (py, mx) (py, x) in haswall board wy wx)
+               ||
+               (let (qy, qx) = reflect (py, px) (py, x) in haswall board qy qx))
+               in
+    let can2 = not (haswall board my px) &&
+               not (haswall board y mx) &&
+               ((let (wy, wx) = reflect (my, px) (y, px) in haswall board wy wx)
+               ||
+               (let (qy, qx) = reflect (py, px) (y, px) in haswall board qy qx))
+               in
+    match (board.board.(py).(x), board.board.(y).(px)) with
+      |(Player a, Player b) -> can1 || can2
+      |(Player a, _) -> can1
+      |(_, Player b) -> can2
       |_ -> false
     end
     |_ -> false (* cannot move somewhere not a space *)
   end
-  |PlaceWall wlist -> (* after thanksgiving dinner :) *)
+  |PlaceWall wlist -> begin
+    let rec canplace = function
+    |[] -> true
+    |(y, x)::tl -> not (haswall board y x) && canplace tl in
+    if (not (canplace wlist)) then false else
+    let n = (Array.length board.board + 1)/2 in
+    let mark = Array.init n (fun x -> Array.init n (fun x -> false)) in
+    let top = ref false in let bot = ref false in
+    let dirs = [|(0, 2);(2, 0);(-2, 0);(0,-2)|] in
+    let rec visit mark top bot (y, x) =
+      if (mark.(y/2).(x/2) || x < 0 || y < 0 || x >= 2*n || y >= 2*n)
+       then ()
+      else mark.(y/2).(x/2) <- true;
+      (if (y == 0) then top := true else
+       if (y == 2*n - 2) then bot := true else ());
+      for i = 0 to 3 do let (dy, dx) = dirs.(i) in
+       if(not (haswall board (y + dy/2) (x + dx/2) ||
+       List.mem (y + dy/2, x + dx/2) wlist))
+       then visit mark top bot (y + dy, x + dx) else () done
+    in (visit mark top bot (py, px));
+    if player_id = 0 then !bot else !top
+  end
 
 let ai_move board player_id =
   failwith "TODO"
