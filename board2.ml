@@ -1,5 +1,6 @@
 open Graphics
 open GraphicsRipper
+open Model
 
 type direction = Left | Right | Up | Down | None
 type wall = {x: int; y: int; dir: direction}
@@ -26,8 +27,10 @@ let boardRegal = make_image (rip "Board_regal")
 let pawnRegal = make_image (rip "Pawn_Regal")
 let banner1 = make_image (rip "Banner1")
 let banner2 = make_image (rip "Banner2")
-let trigger = ref false
-
+let menu = make_image (rip "menu")
+let board = ref (create_board 9)
+let trigger = ref true
+let button = ref false
 
 let draw_box x y size =
   set_color (rgb 207 207 207);
@@ -109,18 +112,23 @@ let draw_everything ghost walls players ghost_wall play=
     draw_string ("Current Player: "^ string_of_int(play)));
   synchronize graph
 
-let lst = [Button_down; Key_pressed; Mouse_motion]
+let drawMenu () =
+  clear_graph graph;
+  draw_image menu 0 0;
+  synchronize graph
+
+(*let lst = [Button_down; Key_pressed; Mouse_motion]*)
+let lst = [Poll]
 
 let rec loop (players:player list) (walls:wall list) (cur_player: int) =
   let new_walls = ref walls in
   let cur = wait_next_event lst in
   let new_player =
-    if cur.keypressed then
+    if (cur.keypressed) then
       match cur.key with
         | '\027' -> exit 0
-        | 'q' -> trigger := not(!trigger); cur_player
         | _ -> cur_player
-    else if cur.button then
+    else if cur.button && not(!button) then
       (let mx = cur.mouse_x / 100 in
       let my = cur.mouse_y / 100 in
       let sidex = cur.mouse_x mod 100 in
@@ -183,10 +191,30 @@ let rec loop (players:player list) (walls:wall list) (cur_player: int) =
       );
       cur_player
   in
-  loop players !new_walls new_player
+  button := cur.button; loop players !new_walls new_player
 
-let _ =
-  let player1 = {cont = Human; color = green; pos_x = 4; pos_y = 0; num_walls = 5} in
-  let player2 = {cont = Human; color = red; pos_x = 4; pos_y = 8; num_walls = 5} in
+let players () =
+  button := true;
+  let player1 = {cont = Human; color = green; pos_x = 4; pos_y = 8; num_walls = 5} in
+  let player2 = {cont = Human; color = red; pos_x = 4; pos_y = 0; num_walls = 5} in
   draw_board (); synchronize graph;
   loop [player1;player2] [] 0
+
+let rec menuLoop () =
+  let event = wait_next_event lst in
+  if (event.key = '\027') then ignore(close_graph graph;exit 0) else
+  if (event.button && not(!button)) then
+    let posx = event.mouse_x in
+    let posy = event.mouse_y in
+        if (posy >= 145 && posy <= 340) then
+      if (posx >= 97 && posx <= 422) then
+        players ()
+      else if (posx >= 470 && posx <= 784) then
+        drawMenu ()(* How to play button *)
+      else
+        drawMenu ()
+    else
+      drawMenu ()
+  else ();button := event.button; menuLoop ()
+
+let _ = drawMenu (); menuLoop ()
