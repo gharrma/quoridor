@@ -3,7 +3,7 @@ open GraphicsRipper
 open Model
 
 type direction = Left | Right | Up | Down | None
-type wall = {x: int; y: int; dir: direction}
+type wallGui = {x: int; y: int; dir: direction}
 type controller = Human | Ai
 type player = {
   cont: controller;
@@ -28,7 +28,7 @@ let pawnRegal = make_image (rip "Pawn_Regal")
 let banner1 = make_image (rip "Banner1")
 let banner2 = make_image (rip "Banner2")
 let menu = make_image (rip "menu")
-let board = ref (create_board 9)
+let save = ref (create_board 9)
 let trigger = ref true
 let button = ref false
 
@@ -44,7 +44,7 @@ let draw_player player =
   if !trigger then draw_image pawnRegal (player.pos_x *100 + 10) (player.pos_y * 100 + 10)
   else ()
 
-let rec draw_walls (walls:wall list) =
+let rec draw_walls (walls:wallGui list) =
   set_color (rgb 153 87 11);
   match walls with
     | [] -> ()
@@ -64,7 +64,7 @@ let rec draw_walls (walls:wall list) =
               |None -> ()
             in draw_walls t
 
-let draw_ghost (w:wall) =
+let draw_ghost (w:wallGui) =
   set_color (rgb 158 132 101);
   match w.dir with
     |Left ->
@@ -120,7 +120,7 @@ let drawMenu () =
 (*let lst = [Button_down; Key_pressed; Mouse_motion]*)
 let lst = [Poll]
 
-let rec loop (players:player list) (walls:wall list) (cur_player: int) =
+let rec loop (players:player list) (walls:wallGui list) (cur_player: int) =
   let new_walls = ref walls in
   let cur = wait_next_event lst in
   let new_player =
@@ -134,8 +134,10 @@ let rec loop (players:player list) (walls:wall list) (cur_player: int) =
       let sidex = cur.mouse_x mod 100 in
       let sidey = cur.mouse_y mod 100 in
       if (sidex < 80 && sidey < 80) then (
-        if (mx  >= 0 && mx < 9 && my >= 0 && my < 9) (* Validate move player *) then
+        let mv = validate_move cur_player (Move(my*2, mx*2)) (!save) in
+        if (fst mv) (* Validate move player *) then
           let play = List.nth players cur_player in
+          save := (snd mv);
           play.pos_x <- mx; play.pos_y <- my;
           let next = next_player players cur_player in
           draw_everything false (!new_walls) players {x = 0; y = 0; dir = None} next;
@@ -148,20 +150,44 @@ let rec loop (players:player list) (walls:wall list) (cur_player: int) =
         (if (mx  >= 0 && mx < 9 && my >= 0 && my < 9) (* Validate wall placement *) then
           let temp_wall =
             if (sidey <= 50 && sidex > 50) then
-              {x = mx; y = my; dir = Down}::[] else
+              let l = [(my*2-1, mx*2-1);(my*2-2, mx*2-1);(my*2-3, mx*2-1)] in
+              let mv = validate_move cur_player (PlaceWall(l)) (!save) in
+              if (fst mv) then
+                let _ = save := (snd mv) in
+                {x = mx; y = my; dir = Down}::[] else []
+              else
             if (sidex <= 50 && sidey > 50) then
-              {x = mx; y = my; dir = Left}::[] else
+              let l = [(my*2-1, mx*2-1);(my*2-1, mx*2-2);(my*2-1, mx*2-3)] in
+              let mv = validate_move cur_player (PlaceWall(l)) (!save) in
+              if (fst mv) then
+                let _ = save := (snd mv) in
+                {x = mx; y = my; dir = Left}::[] else []
+              else
             if (sidex > 80 && sidey > 50) then
-              {x = mx; y = my; dir = Up}::[] else
+              let l = [(my*2-1, mx*2-1);(my*2-2, mx*2-1);(my*2-3, mx*2-1)] in
+              let mv = validate_move cur_player (PlaceWall(l)) (!save) in
+              if (fst mv) then
+                let _ = save := (snd mv) in
+                {x = mx; y = my; dir = Up}::[] else []
+              else
             if (sidey > 80 && sidex > 50) then
-              {x = mx; y = my; dir = Right}::[] else []
+              let l = [(my*2-1, mx*2-1);(my*2-2, mx*2-1);(my*2-3, mx*2-1)] in
+              let mv = validate_move cur_player (PlaceWall(l)) (!save) in
+              if (fst mv) then
+                let _ = save := (snd mv) in
+                {x = mx; y = my; dir = Right}::[] else [] else []
           in
-          new_walls := temp_wall@(!new_walls);
-          let play = List.nth players cur_player in
-          play.num_walls <- play.num_walls - 1;
-          let next = next_player players cur_player in
-          draw_everything false (!new_walls) players {x = 0; y = 0; dir = None} next;
-          next
+          if temp_wall = [] then
+            (print_string("Invalid move, move again!\n");
+            draw_everything false (!new_walls) players {x = 0; y = 0; dir = None} cur_player;
+            cur_player)
+          else
+            let _ = new_walls := temp_wall@(!new_walls) in
+            let play = List.nth players cur_player in
+            play.num_walls <- play.num_walls - 1;
+            let next = next_player players cur_player in
+            draw_everything false (!new_walls) players {x = 0; y = 0; dir = None} next;
+            next
         else
           (print_string("Invalid move, move again!\n");
           draw_everything false (!new_walls) players {x = 0; y = 0; dir = None} cur_player;
@@ -195,8 +221,8 @@ let rec loop (players:player list) (walls:wall list) (cur_player: int) =
 
 let players () =
   button := true;
-  let player1 = {cont = Human; color = green; pos_x = 4; pos_y = 8; num_walls = 5} in
-  let player2 = {cont = Human; color = red; pos_x = 4; pos_y = 0; num_walls = 5} in
+  let player1 = {cont = Human; color = green; pos_x = 4; pos_y = 0; num_walls = 10} in
+  let player2 = {cont = Human; color = red; pos_x = 4; pos_y = 8; num_walls = 10} in
   draw_board (); synchronize graph;
   loop [player1;player2] [] 0
 

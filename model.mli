@@ -50,7 +50,7 @@ val board_from_file : string -> t
 
 (** [validate_move player_id move board] validates a movement or wall placement
     by a player, returning whether the move succeeded and updated the board. *)
-val validate_move : id -> move -> t -> bool
+val validate_move : id -> move -> t -> bool * t
 
 (** [ai_move player_id board] requests a move from the AI. *)
 val ai_move : id -> t -> t

@@ -38,8 +38,8 @@ let print_game t =
 
 let create_board size =
   let rep_size = size * 2 - 1 in
-  let p0_pos = ((rep_size / 2, 0), 10) in
-  let p1_pos = ((rep_size / 2, rep_size - 1), 10) in
+  let p0_pos = ((0, rep_size / 2), 10) in
+  let p1_pos = ((rep_size - 1, rep_size / 2), 10) in
   let players = [| p0_pos; p1_pos |] in
 
   let fill_space y x =
@@ -104,7 +104,7 @@ let validate_move player_id move board =
     (board.board.(py).(px) <- Space);
     (board.board.(y).(x) <- Player player_id);
     (board.players.(player_id) <- ((y, x), nwalls));
-    canmove end else false
+    (canmove, board) end else (false, board)
   |PlaceWall wlist -> let canmove = begin
     if (nwalls == 0) then false else
     let rec canplace = function
@@ -133,7 +133,7 @@ let validate_move player_id move board =
     |(y, x)::tl -> (board.board.(y).(x) <- Wall); updatewalls tl in
     (updatewalls wlist);
     (board.players.(player_id) <- ((py, px), nwalls - 1));
-    canmove end else false
+    (canmove, board) end else (false, board)
 
 let ai_move board player_id =
   failwith "TODO"
@@ -141,4 +141,4 @@ let ai_move board player_id =
 let board_from_file s =
   failwith "TODO"
 
-let _ = print_game (create_board 7)
+(*let _ = print_game (create_board 7)*)
