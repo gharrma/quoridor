@@ -150,28 +150,28 @@ let rec loop (players:player list) (walls:wallGui list) (cur_player: int) =
         (if (mx  >= 0 && mx < 9 && my >= 0 && my < 9) (* Validate wall placement *) then
           let temp_wall =
             if (sidey <= 50 && sidex > 50) then
-              let l = [(my*2-1, mx*2-1);(my*2-2, mx*2-1);(my*2-3, mx*2-1)] in
+              let l = [(my*2+1, mx*2+1);(my*2, mx*2+1);(my*2-1, mx*2+1)] in
               let mv = validate_move cur_player (PlaceWall(l)) (!save) in
               if (fst mv) then
                 let _ = save := (snd mv) in
                 {x = mx; y = my; dir = Down}::[] else []
               else
             if (sidex <= 50 && sidey > 50) then
-              let l = [(my*2-1, mx*2-1);(my*2-1, mx*2-2);(my*2-1, mx*2-3)] in
+              let l = [(my*2+1, mx*2+1);(my*2+1, mx*2);(my*2+1, mx*2-1)] in
               let mv = validate_move cur_player (PlaceWall(l)) (!save) in
               if (fst mv) then
                 let _ = save := (snd mv) in
                 {x = mx; y = my; dir = Left}::[] else []
               else
             if (sidex > 80 && sidey > 50) then
-              let l = [(my*2-1, mx*2-1);(my*2, mx*2-1);(my*2 + 1, mx*2-1)] in
+              let l = [(my*2+1, mx*2+1);(my*2+2, mx*2+1);(my*2+3, mx*2+1)] in
               let mv = validate_move cur_player (PlaceWall(l)) (!save) in
               if (fst mv) then
                 let _ = save := (snd mv) in
                 {x = mx; y = my; dir = Up}::[] else []
               else
             if (sidey > 80 && sidex > 50) then
-              let l = [(my*2-1, mx*2-1);(my*2-1, mx*2);(my*2-1, mx*2+1)] in
+              let l = [(my*2+1, mx*2+1);(my*2+1, mx*2+2);(my*2+1, mx*2+3)] in
               let mv = validate_move cur_player (PlaceWall(l)) (!save) in
               if (fst mv) then
                 let _ = save := (snd mv) in
