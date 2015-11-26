@@ -112,19 +112,19 @@ let validate_move player_id move board =
     |(y, x)::tl -> not (haswall board y x) && canplace tl in
     if (not (canplace wlist)) then false else
     let n = (Array.length board.board + 1)/2 in
-    let mark = Array.init n (fun x -> Array.init n (fun x -> false)) in
+    let mark = ref (Array.init n (fun x -> Array.init n (fun x -> false))) in
     let top = ref false in let bot = ref false in
     let dirs = [|(0, 2);(2, 0);(-2, 0);(0,-2)|] in
     let rec visit mark top bot (y, x) =
-      if (mark.(y/2).(x/2) || x < 0 || y < 0 || x >= 2*n || y >= 2*n)
+      if (x < 0 || y < 0 || x >= 2*n || y >= 2*n || !mark.(y/2).(x/2))
        then ()
-      else mark.(y/2).(x/2) <- true;
+      else begin !mark.(y/2).(x/2) <- true;
       (if (y == 0) then top := true else
        if (y == 2*n - 2) then bot := true else ());
       for i = 0 to 3 do let (dy, dx) = dirs.(i) in
        if(not (haswall board (y + dy/2) (x + dx/2) ||
        List.mem (y + dy/2, x + dx/2) wlist))
-       then visit mark top bot (y + dy, x + dx) else () done
+       then visit mark top bot (y + dy, x + dx) else () done end
     in (visit mark top bot (py, px));
     if player_id = 0 then !bot else !top
     end in if (canmove) then begin (* update the board *)
