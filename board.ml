@@ -1,155 +1,236 @@
 open Graphics
+open GraphicsRipper
+open Model
 
-type direction = Left | Right | Up | Down | None
-type wall = {x: int; y: int; dir: direction}
 type controller = Human | Ai
 type player = {
   cont: controller;
   color: color;
   mutable num_walls: int;
   mutable pos_x: int;
-  mutable pos_y: int}
+  mutable pos_y: int;
+}
 
-let lst_players = []
+let list_players = []
 
+(* Set up display *)
 let graph = open_graph " 880x920"
 let _ = auto_synchronize false
 let _ = display_mode false
+let _ = set_window_title "Quoridor"
 
-let draw_box x y size =
-  set_color (rgb 207 207 207);
-  let start_x = x * 100 in
-  let start_y = y * 100 in
-  fill_rect start_x start_y size size
+(* Set up images *)
+let wallHRegal = make_image (rip "WallH_Regal")
+let wallVRegal = make_image (rip "WallV_Regal")
+let wallCRegal = make_image (rip "WallC_Regal")
+let boardRegal = make_image (rip "Board_Regal")
+let pawnRegal = make_image (rip "Pawn_Regal")
+let banner1Regal = make_image (rip "Banner1_Regal")
+let banner2Regal = make_image (rip "Banner2_Regal")
+let menu = make_image (rip "menu")
 
+(* Set up defaults *)
+let save = ref (create_board 9)
+let board_type = ref 0
+let button = ref false
+
+(* Convert an array y marking to pixel coordinate *)
+let yf z =
+  let inv = abs(16 - z)/2 in
+  match z mod 2 with
+    | 0 -> inv*100
+    | _ -> inv*100 + 80
+
+(* Convert an array x marking to pixel coordinates *)
+let xf z =
+  let inv = z/2 in
+  match z mod 2 with
+    | 0 -> inv*100
+    | _ -> inv*100 + 80
+
+(* draw a player's circle and their board covering *)
 let draw_player player =
   set_color (player.color);
-  fill_circle (player.pos_x * 100 + 40) (player.pos_y * 100 + 40) 30
+  fill_circle ((xf player.pos_x) + 40) ((yf player.pos_y) + 40) 30;
+  let img = match !board_type with
+    | 0 -> pawnRegal
+    | _ -> pawnRegal
+  in
+  draw_image img ((xf player.pos_x) + 10) ((yf player.pos_y) + 10)
 
-let rec draw_walls (walls:wall list) =
-  set_color (rgb 153 87 11);
-  match walls with
-    | [] -> ()
-    | h::t -> let _ = match h.dir with
-              |Left -> fill_rect (h.x*100 - 100) (h.y*100 + 80) 180 20
-              |Right -> fill_rect (h.x*100) (h.y*100 + 80) 180 20
-              |Up -> fill_rect (h.x*100 + 80) (h.y*100) 20 180
-              |Down -> fill_rect (h.x*100 + 80) (h.y*100 - 100) 20 180
-              |None -> ()
-            in draw_walls t
-
-let draw_ghost (w:wall) =
-  set_color (rgb 158 132 101);
-  match w.dir with
-    |Left -> fill_rect (w.x - 100) w.y 180 20
-    |Right -> fill_rect w.x w.y 180 20
-    |Up -> fill_rect w.x w.y 20 180
-    |Down -> fill_rect w.x (w.y - 100) 20 180
-    |None -> ()
-
-let draw_board () =
-  clear_graph graph;
-  for i = 0 to 8 do
-    for j = 0 to 8 do
-      draw_box i j 80
-    done
+(* draw walls based on save ref *)
+let draw_walls () =
+  let board = (!save).board in
+  let wallH = match !board_type with
+    | _ -> wallHRegal
+  in
+  let wallV = match !board_type with
+    | _ -> wallVRegal
+  in
+  let wallC = match !board_type with
+    | _ -> wallCRegal
+  in
+  for i = 0 to 16 do
+    if i mod 2 = 0 then
+      for j = 0 to 7 do
+        match board.(i).(j*2 + 1) with
+          | Wall -> draw_image wallV (xf (j*2 + 1)) (yf i)
+          | _ -> ()
+      done
+    else
+      for j = 0 to 16 do
+        match board.(i).(j) with
+          | Wall -> (match j mod 2 with
+                      | 0 -> draw_image wallH (xf j) (yf i)
+                      | _ -> draw_image wallC (xf j) (yf i))
+          | _ -> ()
+      done
   done
 
-let lst = [Button_down; Key_pressed; Mouse_motion]
+(* draw a ghost wall *)
+let rec draw_ghost (walls:loc list) =
+  set_color (rgb 158 132 101);
+  match walls with
+    | [] -> ()
+    | (y, x)::t -> match y mod 2 with
+                    | 0 -> fill_rect (xf x) (yf y) 20 80; draw_ghost t
+                    | _ -> match x mod 2 with
+                            | 0 -> fill_rect (xf x) (yf y) 80 20; draw_ghost t
+                            | _ -> fill_rect (xf x) (yf y) 20 20; draw_ghost t
+
+(* draws the board *)
+let draw_board () =
+  match !board_type with
+    | _ -> draw_image boardRegal 0 0
+
+(* Draws everything (calls functions) *)
+let draw ghosts players play synch =
+  draw_board ();
+  for i = 0 to ((List.length players) -1) do
+    draw_player (List.nth players i)
+  done;
+  draw_walls ();
+  draw_ghost ghosts;
+  match play with
+    | 0 -> draw_image banner1Regal 0 880;
+    | _ -> draw_image banner2Regal 0 880;
+  if synch then synchronize graph else ()
+
+let drawMenu () =
+  clear_graph graph;
+  draw_image menu 0 0;
+  synchronize graph
 
 let next_player players player =
   let num = List.length players - 1 in
   let new_val_attempt = player + 1 in
   if (new_val_attempt > num) then 0 else new_val_attempt
 
-let draw_everything ghost walls players ghost_wall play=
-  draw_board ();
-  for i = 0 to ((List.length players) - 1) do
-    draw_player (List.nth players i)
-  done;
-  draw_walls walls;
-  (if ghost then draw_ghost ghost_wall else ());
-  moveto 400 890;
-  let player = List.nth players play in
-  set_color (player.color);
-  draw_string ("Current Player: "^ string_of_int(play));
-  synchronize graph
-
-let rec loop (players:player list) (walls:wall list) (cur_player: int) =
-  let new_walls = ref walls in
-  let cur = wait_next_event lst in
+let rec loop (players:player list) (cur_player:int) =
+  let event = wait_next_event [Poll] in
   let new_player =
-    if cur.keypressed then
-      match cur.key with
+    if (event.keypressed) then
+      match event.key with
         | '\027' -> exit 0
-        | _ -> cur_player
-    else if cur.button then
-      (let mx = cur.mouse_x / 100 in
-      let my = cur.mouse_y / 100 in
-      let sidex = cur.mouse_x mod 100 in
-      let sidey = cur.mouse_y mod 100 in
-      if (sidex < 80 && sidey < 80) then (
-        if (mx  >= 0 && mx < 9 && my >= 0 && my < 9) (* Validate move player *) then
+        | _      -> cur_player
+    else if event.button && not(!button) then
+      let mx = (event.mouse_x / 100) * 2 in
+      let modx = event.mouse_x mod 80 in
+      let mody = event.mouse_y mod 80 in
+      let my = abs(16 - ((event.mouse_y / 100) * 2)) +
+                if mody >= 80 then 1 else 0 in
+      if(modx < 80 && mody < 80) then
+        let mv = validate_move cur_player (Move(my,mx)) (!save) in
+        if (fst mv) then
           let play = List.nth players cur_player in
+          save := (snd mv);
           play.pos_x <- mx; play.pos_y <- my;
           let next = next_player players cur_player in
-          draw_everything false (!new_walls) players {x = 0; y = 0; dir = None} next;
-          next
+          draw [] players next true; next
         else
-          (print_string("Invalid move, move again!\n");
-          draw_everything false (!new_walls) players {x = 0; y = 0; dir = None} cur_player;
-          cur_player ))
+          let _ = draw [] players cur_player false in
+          moveto 600 890;
+          set_color white;
+          draw_string "Invalid Move";
+          synchronize graph;
+          cur_player
       else
-        (if (mx  >= 0 && mx < 9 && my >= 0 && my < 9) (* Validate wall placement *) then
-          let temp_wall =
-            if (sidey <= 50 && sidex > 50) then
-              {x = mx; y = my; dir = Down}::[] else
-            if (sidex <= 50 && sidey > 50) then
-              {x = mx; y = my; dir = Left}::[] else
-            if (sidex > 80 && sidey > 50) then
-              {x = mx; y = my; dir = Up}::[] else
-            if (sidey > 80 && sidex > 50) then
-              {x = mx; y = my; dir = Right}::[] else []
-          in
-          new_walls := temp_wall@(!new_walls);
-          let play = List.nth players cur_player in
-          play.num_walls <- play.num_walls - 1;
-          let next = next_player players cur_player in
-          draw_everything false (!new_walls) players {x = 0; y = 0; dir = None} next;
-          next
-        else
-          (print_string("Invalid move, move again!\n");
-          draw_everything false (!new_walls) players {x = 0; y = 0; dir = None} cur_player;
-          cur_player)))
+        let accept =
+          if (mody <= 50 && mody > 50) then (* Down *)
+            let l = [(my, mx);(my+1, mx);(my+2, mx)] in
+            let mv = validate_move cur_player (PlaceWall(l)) (!save) in
+            if (fst mv) then let _ = save := (snd mv) in true else false
+          else if (modx <= 50 && mody > 50) then (* Left *)
+            let l = [(my, mx);(my, mx-1);(my, mx-2)] in
+            let mv = validate_move cur_player (PlaceWall(l)) (!save) in
+            if (fst mv) then let _ = save := (snd mv) in true else false
+          else if (modx > 80 && mody > 50) then (* Up *)
+            let l = [(my, mx);(my-1, mx);(my-2, mx)] in
+            let mv = validate_move cur_player (PlaceWall(l)) (!save) in
+            if (fst mv) then let _ = save := (snd mv) in true else false
+          else if (mody > 80 && modx > 50) then (* Right *)
+            let l = [(my, mx);(my, mx+1);(my, mx+2)] in
+            let mv = validate_move cur_player (PlaceWall(l)) (!save) in
+            if (fst mv) then let _ = save := (snd mv) in true else false
+          else false
+        in
+        if accept
+          then
+            let play = List.nth players cur_player in
+            play.num_walls <- play.num_walls - 1;
+            let next = next_player players cur_player in
+            draw [] players next true; next
+          else
+            let _ = draw [] players cur_player false in
+            moveto 600 890;
+            set_color white;
+            draw_string "Invalid Wall Placement";
+            synchronize graph;
+            cur_player
     else
-      let mx = cur.mouse_x / 100 in
-      let my = cur.mouse_y / 100 in
-      let sidex = cur.mouse_x mod 100 in
-      let sidey = cur.mouse_y mod 100 in
-      let temp_wall =
-        if (mx  >= 0 && mx < 9 && my >= 0 && my < 9) then
-        if (sidex < 80 && sidey < 80) then ({x= 0;y= 0;dir= None}, false) else
-        if (sidey <= 50 && sidex > 50) then
-          ({x = mx*100 + 80; y = my*100; dir = Down}, true) else
-        if (sidex <= 50 && sidey > 50) then
-          ({x = mx*100; y = my*100 + 80; dir = Left}, true) else
-        if (sidex > 80 && sidey > 50) then
-          ({x = mx*100 + 80; y = my*100; dir = Up}, true) else
-        if (sidey > 80 && sidex > 50) then
-          ({x = mx*100; y = my*100 + 80; dir = Right}, true) else
-          ({x= 0;y= 0;dir= None}, false)
-        else ({x= 0;y= 0;dir= None}, false)
+      let mx = (event.mouse_x / 100) * 2 in
+      let modx = event.mouse_x mod 80 in
+      let mody = event.mouse_y mod 80 in
+      let my = abs(16 - ((event.mouse_y / 100) * 2)) +
+                if mody >= 80 then 1 else 0 in
+      let ghosts =
+        if (mody <= 50 && mody > 50) then (* Down *)
+          [(my, mx);(my+1, mx);(my+2, mx)]
+        else if (modx <= 50 && mody > 50) then (* Left *)
+          [(my, mx);(my, mx-1);(my, mx-2)]
+        else if (modx > 80 && mody > 50) then (* Up *)
+          [(my, mx);(my-1, mx);(my-2, mx)]
+        else if (mody > 80 && modx > 50) then (* Right *)
+          [(my, mx);(my, mx+1);(my, mx+2)]
+        else []
       in
-      (if (snd temp_wall) then
-        draw_everything true (!new_walls) players (fst temp_wall) cur_player
-      else draw_everything false (!new_walls) players {x = 0; y = 0; dir = None} cur_player
-      );
-      cur_player
+      draw ghosts players cur_player true; cur_player
   in
-  loop players !new_walls new_player
+  button := event.button; loop players new_player
 
-let _ =
-  let player1 = {cont = Human; color = blue; pos_x = 4; pos_y = 0; num_walls = 5} in
-  let player2 = {cont = Human; color = green; pos_x = 4; pos_y = 8; num_walls = 5} in
-  draw_board (); synchronize graph;
-  loop [player1;player2] [] 0
+let players () =
+  button := true;
+  let pl_1 =
+    {cont = Human; color = red; pos_x = 8; pos_y = 0; num_walls = 10} in
+  let pl_2 =
+    {cont = Human; color = green; pos_x = 8; pos_y = 16; num_walls = 10} in
+  loop [pl_1;pl_2] 0
+
+let rec menuLoop () =
+  let event = wait_next_event [Poll] in
+  if (event.key = '\027') then ignore(close_graph graph; exit 0) else
+  if (event.button && not(!button)) then
+    let posx = event.mouse_x in
+    let posy = event.mouse_y in
+    if (posy >= 145 && posy <= 340) then
+      if (posx >= 97 && posx <= 422) then
+        players ()
+      else if (posx >= 470 && posx <= 784) then
+        drawMenu ()(* How to play button *)
+      else
+        drawMenu ()
+    else
+      drawMenu ()
+  else ();button := event.button; menuLoop ()
+
+let _ = drawMenu (); menuLoop ()
