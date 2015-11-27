@@ -36,7 +36,8 @@ let button = ref false
 
 (* Convert an array y marking to pixel coordinate *)
 let yf z =
-  let inv = abs(16 - z)/2 in
+  let inv1 = (16 - z)/2 in
+  let inv = if (16 - z) = -1 then -1 else inv1 in (* compensate for / spec *)
   match z mod 2 with
     | 0 -> inv*100
     | _ -> inv*100 + 80
@@ -134,11 +135,11 @@ let rec loop (players:player list) (cur_player:int) =
         | '\027' -> exit 0
         | _      -> cur_player
     else if event.button && not(!button) then
-      let mx = (event.mouse_x / 100) * 2 in
-      let modx = event.mouse_x mod 80 in
-      let mody = event.mouse_y mod 80 in
-      let my = abs(16 - ((event.mouse_y / 100) * 2)) +
+      let modx = event.mouse_x mod 100 in
+      let mody = event.mouse_y mod 100 in
+      let my = abs(16 - ((event.mouse_y / 100) * 2)) -
                 if mody >= 80 then 1 else 0 in
+      let mx = (event.mouse_x / 100) * 2 + if modx >= 80 then 1 else 0 in
       if(modx < 80 && mody < 80) then
         let mv = validate_move cur_player (Move(my,mx)) (!save) in
         if (fst mv) then
@@ -156,11 +157,12 @@ let rec loop (players:player list) (cur_player:int) =
           cur_player
       else
         let accept =
-          if (mody <= 50 && mody > 50) then (* Down *)
+          if (mody > 80 && modx > 80) then false
+           else if (mody <= 50 && modx > 80) then (* Down *)
             let l = [(my, mx);(my+1, mx);(my+2, mx)] in
             let mv = validate_move cur_player (PlaceWall(l)) (!save) in
             if (fst mv) then let _ = save := (snd mv) in true else false
-          else if (modx <= 50 && mody > 50) then (* Left *)
+          else if (modx <= 50 && mody > 80) then (* Left *)
             let l = [(my, mx);(my, mx-1);(my, mx-2)] in
             let mv = validate_move cur_player (PlaceWall(l)) (!save) in
             if (fst mv) then let _ = save := (snd mv) in true else false
@@ -188,15 +190,16 @@ let rec loop (players:player list) (cur_player:int) =
             synchronize graph;
             cur_player
     else
-      let mx = (event.mouse_x / 100) * 2 in
-      let modx = event.mouse_x mod 80 in
-      let mody = event.mouse_y mod 80 in
-      let my = abs(16 - ((event.mouse_y / 100) * 2)) +
+      let modx = event.mouse_x mod 100 in
+      let mody = event.mouse_y mod 100 in
+      let my = abs(16 - ((event.mouse_y / 100) * 2)) -
                 if mody >= 80 then 1 else 0 in
+      let mx = (event.mouse_x / 100) * 2 + if modx >= 80 then 1 else 0 in
       let ghosts =
-        if (mody <= 50 && mody > 50) then (* Down *)
+        if (mody > 80 && modx > 80) then [] (* center square *)
+        else if (mody <= 50 && modx > 80) then (* Down *)
           [(my, mx);(my+1, mx);(my+2, mx)]
-        else if (modx <= 50 && mody > 50) then (* Left *)
+        else if (modx <= 50 && mody > 80) then (* Left *)
           [(my, mx);(my, mx-1);(my, mx-2)]
         else if (modx > 80 && mody > 50) then (* Up *)
           [(my, mx);(my-1, mx);(my-2, mx)]
@@ -204,7 +207,8 @@ let rec loop (players:player list) (cur_player:int) =
           [(my, mx);(my, mx+1);(my, mx+2)]
         else []
       in
-      draw ghosts players cur_player true; cur_player
+      draw ghosts players cur_player true;
+      cur_player
   in
   button := event.button; loop players new_player
 
@@ -218,19 +222,25 @@ let players () =
 
 let rec menuLoop () =
   let event = wait_next_event [Poll] in
-  if (event.key = '\027') then ignore(close_graph graph; exit 0) else
-  if (event.button && not(!button)) then
-    let posx = event.mouse_x in
-    let posy = event.mouse_y in
-    if (posy >= 145 && posy <= 340) then
-      if (posx >= 97 && posx <= 422) then
-        players ()
-      else if (posx >= 470 && posx <= 784) then
-        drawMenu ()(* How to play button *)
+  let _ =
+    if (event.keypressed) then
+      match event.key with
+        | '\027' -> exit 0
+        | _      -> ()
+    else if (event.button && not(!button)) then
+      let posx = event.mouse_x in
+      let posy = event.mouse_y in
+      if (posy >= 145 && posy <= 340) then
+        if (posx >= 97 && posx <= 422) then
+          players ()
+        else if (posx >= 470 && posx <= 784) then
+          drawMenu ()(* How to play button *)
+        else
+          drawMenu ()
       else
         drawMenu ()
-    else
-      drawMenu ()
-  else ();button := event.button; menuLoop ()
+    else ()
+  in
+  button := event.button; menuLoop ()
 
 let _ = drawMenu (); menuLoop ()
