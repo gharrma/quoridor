@@ -43,8 +43,8 @@ let create_board size =
   let players = [| p0_pos; p1_pos |] in
 
   let fill_space y x =
-         if (x, y) = fst p0_pos then Player 0
-    else if (x, y) = fst p1_pos then Player 1
+         if (y, x) = fst p0_pos then Player 0
+    else if (y, x) = fst p1_pos then Player 1
     else if x mod 2 = 0 && y mod 2 = 0 then Space
     else NoWall in
   let fill_row y = Array.init rep_size (fill_space y) in
