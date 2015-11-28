@@ -107,26 +107,28 @@ let draw_board () =
 (* Draws everything (calls functions) *)
 let draw ghosts players play synch =
   draw_board ();
-  for i = 0 to ((List.length players) -1) do
+  for i = 0 to ((List.length players) - 1) do
     draw_player (List.nth players i)
   done;
   draw_walls ();
   draw_ghost ghosts;
-  match play with
-    | 0 -> draw_image banner1Regal 0 880;
-    | _ -> draw_image banner2Regal 0 880;
+  (match play with
+    | 0 -> draw_image banner1Regal 0 880
+    | _ -> draw_image banner2Regal 0 880);
   if synch then synchronize graph else ()
 
+(* Draws main menu *)
 let drawMenu () =
   clear_graph graph;
   draw_image menu 0 0;
   synchronize graph
 
+(* Iterates to next player *)
 let next_player players player =
-  let num = List.length players - 1 in
-  let new_val_attempt = player + 1 in
-  if (new_val_attempt > num) then 0 else new_val_attempt
+  let num = List.length players in
+  (player + 1) mod num
 
+(* Main game loop *)
 let rec loop (players:player list) (cur_player:int) =
   let event = wait_next_event [Poll] in
   let new_player =
@@ -210,8 +212,10 @@ let rec loop (players:player list) (cur_player:int) =
       draw ghosts players cur_player true;
       cur_player
   in
-  button := event.button; loop players new_player
+  let _ = button := event.button in
+  loop players new_player
 
+(* Sets up players and initializes the game loop *)
 let players () =
   button := true;
   let pl_1 =
@@ -220,27 +224,22 @@ let players () =
     {cont = Human; color = green; pos_x = 8; pos_y = 16; num_walls = 10} in
   loop [pl_1;pl_2] 0
 
+(* Loop for the main menu *)
 let rec menuLoop () =
   let event = wait_next_event [Poll] in
-  let _ =
-    if (event.keypressed) then
-      match event.key with
-        | '\027' -> exit 0
-        | _      -> ()
-    else if (event.button && not(!button)) then
-      let posx = event.mouse_x in
-      let posy = event.mouse_y in
-      if (posy >= 145 && posy <= 340) then
-        if (posx >= 97 && posx <= 422) then
-          players ()
-        else if (posx >= 470 && posx <= 784) then
-          drawMenu ()(* How to play button *)
-        else
-          drawMenu ()
+  if (event.key = 'q') then ignore(close_graph graph; exit 0)  else
+  if (event.button && not(!button)) then
+    let posx = event.mouse_x in
+    let posy = event.mouse_y in
+    if (posy >= 145 && posy <= 340) then
+      if (posx >= 97 && posx <= 422) then
+        players ()
+      else if (posx >= 470 && posx <= 784) then
+        menuLoop ()
       else
-        drawMenu ()
-    else ()
-  in
-  button := event.button; menuLoop ()
+        menuLoop ()
+    else
+      menuLoop ()
+  else button := event.button; menuLoop ()
 
 let _ = drawMenu (); menuLoop ()
