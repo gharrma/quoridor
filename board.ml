@@ -27,6 +27,7 @@ let boardRegal = make_image (rip "Board_Regal")
 let pawnRegal = make_image (rip "Pawn_Regal")
 let banner1Regal = make_image (rip "Banner1_Regal")
 let banner2Regal = make_image (rip "Banner2_Regal")
+let howTo = make_image (rip "howTo")
 let menu = make_image (rip "menu")
 
 (* Set up defaults *)
@@ -123,6 +124,12 @@ let drawMenu () =
   draw_image menu 0 0;
   synchronize graph
 
+(* Draws How to Play *)
+let drawHow () =
+  clear_graph graph;
+  draw_image howTo 0 0;
+  synchronize graph
+
 (* Iterates to next player *)
 let next_player players player =
   let num = List.length players in
@@ -159,7 +166,7 @@ let rec loop (players:player list) (cur_player:int) =
           cur_player
       else
         let accept =
-          if (mody > 80 && modx > 80) then false
+          if (mody >= 80 && modx >= 80) then false
            else if (mody <= 50 && modx > 80) then (* Down *)
             let l = [(my, mx);(my+1, mx);(my+2, mx)] in
             let mv = validate_move cur_player (PlaceWall(l)) (!save) in
@@ -198,7 +205,7 @@ let rec loop (players:player list) (cur_player:int) =
                 if mody >= 80 then 1 else 0 in
       let mx = (event.mouse_x / 100) * 2 + if modx >= 80 then 1 else 0 in
       let ghosts =
-        if (mody > 80 && modx > 80) then [] (* center square *)
+        if (mody >= 80 && modx >= 80) then [] (* center square *)
         else if (mody <= 50 && modx > 80) then (* Down *)
           [(my, mx);(my+1, mx);(my+2, mx)]
         else if (modx <= 50 && mody > 80) then (* Left *)
@@ -224,8 +231,30 @@ let players () =
     {cont = Human; color = green; pos_x = 8; pos_y = 16; num_walls = 10} in
   loop [pl_1;pl_2] 0
 
+(* Loop for instructions menu *)
+let rec howToPlayLoop () =
+  let event = wait_next_event [Poll] in
+  if (event.key = 'q') then ignore(close_graph graph; exit 0)  else
+  if (event.button && not(!button)) then
+    let posx = event.mouse_x in
+    let posy = event.mouse_y in
+    if (posy <= 160) then
+      if (posx <= 220) then
+        menuInit ()
+      else if (posx >= 660) then
+        players ()
+      else
+        howToPlayLoop ()
+    else
+      howToPlayLoop ()
+  else button := event.button; howToPlayLoop ()
+
+(* Initializes instructions Loop *)
+and howToPlayLoopInit () =
+  button := true; drawHow (); howToPlayLoop ()
+
 (* Loop for the main menu *)
-let rec menuLoop () =
+and menuLoop () =
   let event = wait_next_event [Poll] in
   if (event.key = 'q') then ignore(close_graph graph; exit 0)  else
   if (event.button && not(!button)) then
@@ -235,11 +264,13 @@ let rec menuLoop () =
       if (posx >= 97 && posx <= 422) then
         players ()
       else if (posx >= 470 && posx <= 784) then
-        menuLoop ()
+        howToPlayLoopInit ()
       else
         menuLoop ()
     else
       menuLoop ()
   else button := event.button; menuLoop ()
 
-let _ = drawMenu (); menuLoop ()
+and menuInit () = drawMenu (); menuLoop ()
+
+let _ = menuInit ()
