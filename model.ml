@@ -69,9 +69,7 @@ let reflect a b =
 let validate_move player_id move board =
   let ((py, px), nwalls) = (board.players).(player_id) in
   match move with
-  |Move(y, x) -> let canmove = begin
-    match board.board.(y).(x) with
-    |Space -> begin
+  |Move(y, x) -> let canmove = if haswall board y x then false else begin
       if(abs(px - x) + abs(py - y) == 2) then
         not (haswall board ((py + y)/2) ((px + x)/2))
     else if(abs(px - x) + abs(py - y) > 4) then false (* else dist = 4 *)
@@ -98,8 +96,6 @@ let validate_move player_id move board =
       |(Player a, _) -> can1
       |(_, Player b) -> can2
       |_ -> false
-    end
-    |_ -> false (* cannot move somewhere not a space *)
   end in if (canmove) then begin (* update the board *)
     (board.board.(py).(px) <- Space);
     (board.board.(y).(x) <- Player player_id);
@@ -125,8 +121,12 @@ let validate_move player_id move board =
        if(not (haswall board (y + dy/2) (x + dx/2) ||
        List.mem (y + dy/2, x + dx/2) wlist))
        then visit mark top bot (y + dy, x + dx) else () done end
-    in (visit mark top bot (py, px));
-    if player_id = 0 then !bot else !top
+    in (visit mark top bot (fst board.players.(0)));
+    let ans0 = !bot in
+    let mark = ref (Array.init n (fun x -> Array.init n (fun x -> false))) in
+    let top = ref false in
+    (visit mark top bot (fst board.players.(1)));
+    ans0 && !top
     end in if (canmove) then begin (* update the board *)
     let rec updatewalls = function
     |[] -> ()
