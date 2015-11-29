@@ -27,6 +27,10 @@ let boardRegal = make_image (rip "Board_Regal")
 let pawnRegal = make_image (rip "Pawn_Regal")
 let banner1Regal = make_image (rip "Banner1_Regal")
 let banner2Regal = make_image (rip "Banner2_Regal")
+let playerMenu = make_image (rip "player")
+let huHi = make_image (rip "human")
+let aiHi = make_image (rip "ai")
+let colorWheel = make_image (rip "colorwheel")
 let howTo = make_image (rip "howTo")
 let menu = make_image (rip "menu")
 
@@ -128,6 +132,11 @@ let drawMenu () =
 let drawHow () =
   clear_graph graph;
   draw_image howTo 0 0;
+  synchronize graph
+
+let drawPlayer () =
+  clear_graph graph;
+  draw_image playerMenu 0 0;
   synchronize graph
 
 (* Iterates to next player *)
@@ -242,7 +251,7 @@ let rec howToPlayLoop () =
       if (posx <= 220) then
         menuInit ()
       else if (posx >= 660) then
-        players ()
+        playerInit ()
       else
         howToPlayLoop ()
     else
@@ -262,7 +271,7 @@ and menuLoop () =
     let posy = event.mouse_y in
     if (posy >= 145 && posy <= 340) then
       if (posx >= 97 && posx <= 422) then
-        players ()
+        playerInit ()
       else if (posx >= 470 && posx <= 784) then
         howToPlayLoopInit ()
       else
@@ -271,6 +280,25 @@ and menuLoop () =
       menuLoop ()
   else button := event.button; menuLoop ()
 
-and menuInit () = drawMenu (); menuLoop ()
+and menuInit () = button := true; drawMenu (); menuLoop ()
+
+and playerInit () = button := true; drawPlayer (); playerLoop ()
+
+and playerLoop () =
+  let event = wait_next_event [Poll] in
+  if (event.key = 'q') then ignore(close_graph graph; exit 0)  else
+  if (event.button && not(!button)) then
+    let posx = event.mouse_x in
+    let posy = event.mouse_y in
+    if (posy <= 100) then
+      if (posx <= 200) then
+        menuInit ()
+      else if (posx >= 700) then
+        players()
+      else
+       playerLoop()
+    else
+      playerLoop ()
+  else button := event.button; playerLoop ()
 
 let _ = menuInit ()
