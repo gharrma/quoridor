@@ -8,7 +8,7 @@ let _ = display_mode false
 let _ = auto_synchronize false
 
 let menu = make_image (rip "menu")
-let lst = [Poll]
+let lst = [Key_pressed; Poll]
 let button = ref false
 
 let draw s =

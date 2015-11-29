@@ -2,6 +2,7 @@ open Graphics
 open GraphicsRipper
 open Model
 
+type trig = AiThink | MoveInvalid | WallInvalid | Blank
 type controller = Human | Ai
 type player = {
   cont: controller;
@@ -19,24 +20,47 @@ let _ = display_mode false
 let _ = set_window_title "Quoridor"
 
 (* Set up images *)
-let wallHRegal = make_image (rip "WallH_Regal")
-let wallVRegal = make_image (rip "WallV_Regal")
-let wallCRegal = make_image (rip "WallC_Regal")
-let boardRegal = make_image (rip "Board_Regal")
+let wallH = make_image (rip "WallH")
+let wallV = make_image (rip "WallV")
+let wallC = make_image (rip "WallC")
+let boardImg = make_image (rip "board")
 let pawnRegal = make_image (rip "Pawn_Regal")
-let banner1Regal = make_image (rip "Banner1_Regal")
-let banner2Regal = make_image (rip "Banner2_Regal")
+let ban1 = make_image (rip "player1")
+let ban2 = make_image (rip "player2")
+let banner = make_image (rip "banner")
+let bannerAi = make_image (rip "bannerAi")
+let bannerMove = make_image (rip "bannerMove")
+let bannerWall = make_image (rip "bannerWall")
 let playerMenu = make_image (rip "player")
+let win = make_image (rip "win")
+let win1temp = make_image (rip "play1Win")
+let win2temp = make_image (rip "play2Win")
 let huHi = make_image (rip "human")
 let aiHi = make_image (rip "ai")
 let colorWheel = make_image (rip "colorwheel")
 let howTo = make_image (rip "howTo")
 let menu = make_image (rip "menu")
+let img0 = make_image (rip "0")
+let img1 = make_image (rip "1")
+let img2 = make_image (rip "2")
+let img3 = make_image (rip "3")
+let img4 = make_image (rip "4")
+let img5 = make_image (rip "5")
+let img6 = make_image (rip "6")
+let img7 = make_image (rip "7")
+let img8 = make_image (rip "8")
+let img9 = make_image (rip "9")
+let img10 = make_image (rip "10")
+let enumImg = [img0;img1;img2;img3;img4;img5;img6;img7;img8;img9;img10]
 
 (* Set up defaults *)
 let save = ref (create_board 9)
-let board_type = ref 0
 let button = ref false
+let instance = ref Blank
+let play1ban = ref ban1
+let play2ban = ref ban2
+let win1 = ref win1temp
+let win2 = ref win2temp
 
 (* Convert an array y marking to pixel coordinate *)
 let yf z =
@@ -57,24 +81,11 @@ let xf z =
 let draw_player player =
   set_color (player.color);
   fill_circle ((xf player.pos_x) + 40) ((yf player.pos_y) + 40) 30;
-  let img = match !board_type with
-    | 0 -> pawnRegal
-    | _ -> pawnRegal
-  in
-  draw_image img ((xf player.pos_x) + 10) ((yf player.pos_y) + 10)
+  draw_image pawnRegal ((xf player.pos_x) + 10) ((yf player.pos_y) + 10)
 
 (* draw walls based on save ref *)
 let draw_walls () =
   let board = (!save).board in
-  let wallH = match !board_type with
-    | _ -> wallHRegal
-  in
-  let wallV = match !board_type with
-    | _ -> wallVRegal
-  in
-  let wallC = match !board_type with
-    | _ -> wallCRegal
-  in
   for i = 0 to 16 do
     if i mod 2 = 0 then
       for j = 0 to 7 do
@@ -103,37 +114,41 @@ let rec draw_ghost (walls:loc list) =
                             | 0 -> fill_rect (xf x) (yf y) 80 20; draw_ghost t
                             | _ -> fill_rect (xf x) (yf y) 20 20; draw_ghost t
 
-(* draws the board *)
-let draw_board () =
-  match !board_type with
-    | _ -> draw_image boardRegal 0 0
-
 (* Draws everything (calls functions) *)
-let draw ghosts players play synch =
-  draw_board ();
+let draw ghosts players play =
+  clear_graph graph;
+  draw_image boardImg 0 0;
   for i = 0 to ((List.length players) - 1) do
     draw_player (List.nth players i)
   done;
   draw_walls ();
   draw_ghost ghosts;
+  (match !instance with
+    | WallInvalid -> draw_image bannerWall 0 880
+    | AiThink -> draw_image bannerAi 0 880
+    | MoveInvalid -> draw_image bannerMove 0 880
+    | Blank -> draw_image banner 0 880);
   (match play with
-    | 0 -> draw_image banner1Regal 0 880
-    | _ -> draw_image banner2Regal 0 880);
-  if synch then synchronize graph else ()
+    | 0 -> draw_image (!play1ban) 100 887
+    | _ -> draw_image (!play2ban) 100 887);
+  let num = (snd ((!save).players.(play))) in
+  draw_image (List.nth enumImg num) 500 894;
+  synchronize graph
+
 
 (* Draws main menu *)
-let drawMenu () =
+let rec drawMenu () =
   clear_graph graph;
   draw_image menu 0 0;
   synchronize graph
 
 (* Draws How to Play *)
-let drawHow () =
+and drawHow () =
   clear_graph graph;
   draw_image howTo 0 0;
   synchronize graph
 
-let drawPlayer (c1:controller) (c2:controller) (c:color) (c':color) (cw:bool) =
+and drawPlayer (c1:controller) (c2:controller) (c:color) (c':color) (cw:bool) =
   clear_graph graph;
   draw_image playerMenu 0 0;
   (match c1 with
@@ -150,14 +165,40 @@ let drawPlayer (c1:controller) (c2:controller) (c:color) (c':color) (cw:bool) =
   synchronize graph
 
 (* Iterates to next player *)
-let next_player players player =
+and next_player players player =
   let num = List.length players in
   (player + 1) mod num
 
+and checkWin players =
+  if (List.nth players 0).pos_y = 16 then (true, 0) else
+  if (List.nth players 1).pos_y = 0 then (true, 1) else
+  (false, 3)
+
+and waitWin () =
+  let event = wait_next_event [Poll] in
+  if (event.button && not(!button)) then
+    let posx = event.mouse_x in
+    let posy = event.mouse_y in
+    if (posx >= 220 && posx <= 420 && posy >= 340 && posy <= 420) then
+      playerInit ()
+    else if (posx >= 460 && posx <= 660 && posy >= 340 && posy <= 420) then
+      ignore(clear_graph graph; exit 0)
+    else
+      button := event.button; waitWin ()
+  else
+    button := event.button; waitWin ()
+
+and drawWin play =
+  draw_image win 0 0;
+  (match play with
+    | 0 -> draw_image (!win1) 252 467
+    | _ -> draw_image (!win2) 252 467);
+  synchronize graph; button := true; waitWin ()
+
 (* Main game loop *)
-let rec loop (players:player list) (cur_player:int) =
-  (*let win = checkWin players in
-  (if (fst win) then drawWin (snd win) else ());*)
+and loop (players:player list) (cur_player:int) =
+  let win = checkWin players in
+  (if (fst win) then drawWin (snd win) else ());
   if (List.nth players cur_player).cont = Human then
    let event = wait_next_event [Poll] in
     let new_player =
@@ -175,13 +216,9 @@ let rec loop (players:player list) (cur_player:int) =
             save := (snd mv);
             play.pos_x <- mx; play.pos_y <- my;
             let next = next_player players cur_player in
-            draw [] players next true; next
+            instance := Blank; draw [] players next; next
           else
-            let _ = draw [] players cur_player false in
-            moveto 600 890;
-            set_color white;
-            draw_string "Invalid Move";
-            synchronize graph;
+            let _ = instance := MoveInvalid; draw [] players cur_player in
             cur_player
         else
           let accept =
@@ -207,13 +244,10 @@ let rec loop (players:player list) (cur_player:int) =
           if accept
             then
               let next = next_player players cur_player in
-              draw [] players next true; next
+              instance := Blank;
+              draw [] players next; next
             else
-              let _ = draw [] players cur_player false in
-              moveto 600 890;
-              set_color white;
-              draw_string "Invalid Wall Placement";
-              synchronize graph;
+              let _ = instance := WallInvalid; draw [] players cur_player in
               cur_player
       else
         let modx = event.mouse_x mod 100 in
@@ -233,20 +267,24 @@ let rec loop (players:player list) (cur_player:int) =
             [(my, mx);(my, mx+1);(my, mx+2)]
           else []
         in
-        draw ghosts players cur_player true;
-        cur_player
+        draw ghosts players cur_player; cur_player
     in
     let _ = button := event.button in
     loop players new_player
   else
     let next = next_player players cur_player in
+    instance := AiThink; draw [] players cur_player;
     let _ = save := ai_move cur_player (!save) in
-    draw [] players next true; loop players next
+    instance := Blank; draw [] players next; loop players next
 
 
 (* Sets up players and initializes the game loop *)
-let players (c1:controller) (c2:controller) (c:color) (c':color) =
+and players (c1:controller) (c2:controller) (c:color) (c':color) =
   button := true;
+  play1ban := (make_image (ripColorize "player1" c));
+  play2ban := (make_image (ripColorize "player2" c'));
+  win1 := (make_image (ripColorize "play1Win" c));
+  win2 := (make_image (ripColorize "play2Win" c'));
   let pl_1 =
     {cont = c1; color = c; pos_x = 8; pos_y = 0} in
   let pl_2 =
@@ -254,7 +292,7 @@ let players (c1:controller) (c2:controller) (c:color) (c':color) =
   loop [pl_1;pl_2] 0
 
 (* Loop for instructions menu *)
-let rec howToPlayLoop () =
+and howToPlayLoop () =
   let event = wait_next_event [Poll] in
   if (event.key = '\027') then ignore(close_graph graph; exit 0)  else
   if (event.button && not(!button)) then
@@ -295,8 +333,9 @@ and menuLoop () =
 
 and menuInit () = button := true; drawMenu (); menuLoop ()
 
-and playerInit () = button := true; drawPlayer Human Human red green false;
-    playerLoop Human Human red green false 0
+and playerInit () =
+  button := true; drawPlayer Human Human red green false;
+  save := (create_board 9); playerLoop Human Human red green false 0
 
 and playerLoop
       (c1:controller) (c2:controller) (c:color) (c':color) (cw:bool) (id:int) =

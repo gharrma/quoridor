@@ -34,8 +34,17 @@ let rip (name:string) =
   close_in ic;
   z
 
-let ripColorize (name:string) (red:int) (green:int) (blue:int) =
-    let file = name^".pbm" in
+let ripColorize (name:string) (col:color) =
+  let bb1 = col mod 16 in
+  let bb2 = (col/16) mod 16 in
+  let gb1 = (col/256) mod 16 in
+  let gb2 = (col/4096) mod 16 in
+  let rb1 = (col/65536) mod 16 in
+  let rb2 = (col/1048576) mod 16 in
+  let blue = (bb1*16) + bb2 in
+  let green = (gb1*16) + gb2 in
+  let red = (rb1*16) + rb2 in
+  let file = name^".pbm" in
   let ic = open_in file in
   for i = 0 to 2 do (* Rip PBM header *)
     ignore(input_char ic);
