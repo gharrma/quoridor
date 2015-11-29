@@ -24,7 +24,7 @@ let wallH = make_image (rip "WallH")
 let wallV = make_image (rip "WallV")
 let wallC = make_image (rip "WallC")
 let boardImg = make_image (rip "board")
-let pawnRegal = make_image (rip "Pawn_Regal")
+let pawnCover = make_image (rip "pawnCover")
 let ban1 = make_image (rip "player1")
 let ban2 = make_image (rip "player2")
 let banner = make_image (rip "banner")
@@ -81,7 +81,7 @@ let xf z =
 let draw_player player =
   set_color (player.color);
   fill_circle ((xf player.pos_x) + 40) ((yf player.pos_y) + 40) 30;
-  draw_image pawnRegal ((xf player.pos_x) + 10) ((yf player.pos_y) + 10)
+  draw_image pawnCover (xf player.pos_x) (yf player.pos_y)
 
 (* draw walls based on save ref *)
 let draw_walls () =
