@@ -135,7 +135,7 @@ let validate_move player_id move board =
     (board.players.(player_id) <- ((py, px), nwalls - 1));
     (canmove, board) end else (false, board)
 
-let ai_move board player_id =
+let ai_move player_id board =
   failwith "TODO"
 
 let board_from_file s =
