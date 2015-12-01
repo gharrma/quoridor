@@ -200,7 +200,7 @@ and loop (players:player list) (cur_player:int) =
   let win = checkWin players in
   (if (fst win) then drawWin (snd win) else ());
   if (List.nth players cur_player).cont = Human then
-   let event = wait_next_event [Poll] in
+   let event = wait_next_event [Button_down; Key_pressed; Mouse_motion] in
     let new_player =
       if (event.key = '\027') then (close_graph graph; exit 0)
       else if event.button && not(!button) then
@@ -293,7 +293,7 @@ and players (c1:controller) (c2:controller) (c:color) (c':color) =
 
 (* Loop for instructions menu *)
 and howToPlayLoop () =
-  let event = wait_next_event [Poll] in
+  let event = wait_next_event [Button_down; Key_pressed; Mouse_motion] in
   if (event.key = '\027') then ignore(close_graph graph; exit 0)  else
   if (event.button && not(!button)) then
     let posx = event.mouse_x in
@@ -315,7 +315,7 @@ and howToPlayLoopInit () =
 
 (* Loop for the main menu *)
 and menuLoop () =
-  let event = wait_next_event [Poll] in
+  let event = wait_next_event [Button_down; Key_pressed; Mouse_motion] in
   if (event.key = '\027') then ignore(close_graph graph; exit 0)  else
   if (event.button && not(!button)) then
     let posx = event.mouse_x in
@@ -340,7 +340,7 @@ and playerInit () =
 and playerLoop
       (c1:controller) (c2:controller) (c:color) (c':color) (cw:bool) (id:int) =
   drawPlayer c1 c2 c c' cw;
-  let event = wait_next_event [Poll] in
+  let event = wait_next_event [Button_down; Key_pressed; Mouse_motion] in
   if (event.key = '\027') then ignore(close_graph graph; exit 0)  else
   if cw then
     if (event.button && not(!button)) then
