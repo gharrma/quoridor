@@ -17,10 +17,11 @@ let dist_to_win board player_id =
 	  let (py, px) = Queue.pop q in
 	  Hashtbl.add dist (py, px) !depth;
 	  decr cur_nodes;
-	  if !cur_nodes = 0 then
+	  if !cur_nodes = 0 then begin
 		  incr depth;
 		  cur_nodes := !next_nodes;
-		  next_nodes := 0;
+		  next_nodes := 0
+    end;
 	  let chk_neighbor (py, px) (qy, qx) =
 		  let max_ordinate = (2*board.size - 2) in
 		  if qx >= 0 && qy >= 0 && qx <= max_ordinate && qy <= max_ordinate &&
