@@ -2,35 +2,34 @@ open Model
 
 (* Returns the number of moves required to win for a given player. *)
 let dist_to_win board player_id =
-  let (locn, _) = (board.players).(player_id) in
+  let (locn, _) = (board.players).(player_id) in let (iy, ix) = locn in
   let q = Queue.create() in
-  let dist = Hashtbl.create 100 in
-  Queue.push locn q;
-  Hashtbl.add dist locn 0;
+  let n = board.size in
+  let dist = Array.init n (fun x -> Array.init n (fun x -> -1)) in
+  Queue.push (iy/2, ix/2) q;
+  (dist.(iy/2).(ix/2) <- 0);
   while (not (Queue.is_empty q)) do
 	  let (py, px) = Queue.pop q in
 	  let chk_neighbor (py, px) (qy, qx) =
-		  let max_ordinate = (2*board.size - 2) in
-		  if qx >= 0 && qy >= 0 && qx <= max_ordinate && qy <= max_ordinate &&
-  				not ((board.board).((py+qy)/2).((px+qx)/2) = Wall) &&
-  				not (Hashtbl.mem dist (qy, qx)) then begin
+		  if qx >= 0 && qy >= 0 && qx <= n - 1 && qy <= n - 1 &&
+  				not ((board.board).(py+qy).(px+qx) = Wall) &&
+  				dist.(qy).(qx) = -1 then begin
 			  Queue.push (qy, qx) q;
-        Hashtbl.add dist (qy, qx) ((Hashtbl.find dist (py, px)) + 1);
+        (dist.(qy).(qx) <- dist.(py).(px) + 1);
       end
-	  in
-	  List.iter (chk_neighbor (py, px)) [(py-2, px); (py+2, px); (py, px-2); (py, px+2)]
+	  in List.iter (chk_neighbor (py, px))
+    [(py-1, px); (py+1, px); (py, px-1); (py, px+1)]
   done;
-  let dist_to dest_locn =
-	  try Hashtbl.find dist dest_locn with
-	  | Not_found -> max_int
+  let dist_to loc =
+    let (ly, lx) = loc in
+    if (dist.(ly).(lx) > 0) then dist.(ly).(lx) else max_int
   in
   let rec build_inc_lst n m = (* [(n,m), (n,m-2), (n,m-4), ..., (n,0)] *)
-	if m >= 0 then (n,m)::(build_inc_lst n (m-2)) else [] in
+	if m >= 0 then (n,m)::(build_inc_lst n (m-1)) else [] in
   let winning_locns = if player_id = 0 then
-    build_inc_lst (2*board.size - 2) (2*board.size - 2)
-  else build_inc_lst 0 (2*board.size - 2) in
-  let res = List.fold_left min max_int (List.map dist_to winning_locns) in
-  res
+    build_inc_lst (board.size - 1) (board.size - 1)
+  else build_inc_lst 0 (board.size - 1) in
+  List.fold_left min max_int (List.map dist_to winning_locns)
 
 
 (* Returns a list of all possible moves that a given player can make. *)

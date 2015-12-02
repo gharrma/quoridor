@@ -106,7 +106,7 @@ let validate_move player_id move board =
     |[] -> true
     |(y, x)::tl -> not (haswall board y x) && canplace tl in
     if (not (canplace wlist)) then false else
-    let n = (Array.length board.board + 1)/2 in
+    let n = board.size in
     let mark = ref (Array.init n (fun x -> Array.init n (fun x -> false))) in
     let top = ref false in let bot = ref false in
     let dirs = [|(0, 2);(2, 0);(-2, 0);(0,-2)|] in
