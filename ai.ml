@@ -46,11 +46,12 @@ let get_valid_moves board player_id =
 
   (* possible wall placements *)
   (* only consider down and right, to avoid considering a pair of walls twice *)
-  let rec build_inc_lst n = (* 0, 1, 2, ..., size-1 *)
-	if n < board.size then n::(build_inc_lst (n+1)) else [] in
-  let all  = build_inc_lst 0 in
+  let rec build_inc_lst n thresh = (* 0, 1, 2, ..., thresh-1 *)
+	if n < thresh then n::(build_inc_lst (n+1) thresh) else [] in
+  let all  = build_inc_lst 0 board.size in
   let even = List.map (fun x -> 2 * x)     all in
   let odd  = List.map (fun x -> 2 * x + 1) all in
+  let all_full = build_inc_lst 0 (board.size * 2 - 2) in
   let wall_placements =
 	List.flatten (
 	  List.map (fun x ->
@@ -58,7 +59,7 @@ let get_valid_moves board player_id =
 		  List.map (fun y -> PlaceWall [(y,x); (y+1,x); (y+2,x)]) even
 		else
 		  List.map (fun y -> PlaceWall [(y,x); (y,x+1); (y,x+2)]) odd
-	  ) all
+	  ) all_full
 	) in
 
   (* Filter out invalid moves *)
