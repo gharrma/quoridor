@@ -103,7 +103,7 @@ let minimax game player_id =
 					  let w = worse b otl in if(d < w) then d else w
 				  in let w = worse pb oml in
 				  let (prevbest, bestmoves) = best game oid pid ptl in
-				  if (w == prevbest) then (w, pm::bestmoves) else
+				  if (w = prevbest) then (w, pm::bestmoves) else
 				  if (w > prevbest) then (w, [pm]) else (prevbest, bestmoves)
   in snd (best game op_id player_id pml)
 
