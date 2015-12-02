@@ -11,29 +11,30 @@ let dist_to_win board player_id =
   let next_nodes = ref 0 in
   let depth = ref 0 in
   while (not (Queue.is_empty q)) do
-      let (py, px) = Queue.pop q in
-      Hashtbl.add vis (py, px) true;
-      Hashtbl.add dist (py, px) !depth;
-      cur_nodes := !cur_nodes - 1;
-      if !cur_nodes = 0 then
-          depth := !depth + 1;
-          cur_nodes := !next_nodes;
-          next_nodes := 0;
-      let chk_neighbor (py, px) (qy, qx) =
-          if qx >= 0 && qy >= 0 && qx <= board.size && qy <= board.size &&
-                not ((board.board).((py+qy)/2).((px+qx)/2) = Wall) &&
-                not (Hashtbl.mem vis (px, py)) then
-              next_nodes := !next_nodes + 1;
-              Queue.push (py, px) q;
-      in
-      List.iter (chk_neighbor (py, px)) [(py-2, px); (py+2, px); (py, px-2); (py, px+2)]
+	  let (py, px) = Queue.pop q in
+	  Hashtbl.add vis (py, px) true;
+	  Hashtbl.add dist (py, px) !depth;
+	  cur_nodes := !cur_nodes - 1;
+	  if !cur_nodes = 0 then
+		  depth := !depth + 1;
+		  cur_nodes := !next_nodes;
+		  next_nodes := 0;
+	  let chk_neighbor (py, px) (qy, qx) =
+		  let max_ordinate = (2*board.size - 2) in
+		  if qx >= 0 && qy >= 0 && qx <= max_ordinate && qy <= max_ordinate &&
+				not ((board.board).((py+qy)/2).((px+qx)/2) = Wall) &&
+				not (Hashtbl.mem vis (py, px)) then
+			  next_nodes := !next_nodes + 1;
+			  Queue.push (py, px) q;
+	  in
+	  List.iter (chk_neighbor (py, px)) [(py-2, px); (py+2, px); (py, px-2); (py, px+2)]
   done;
   let dist_to dest_locn =
-      try Hashtbl.find dist dest_locn with
-      | Not_found -> max_int
+	  try Hashtbl.find dist dest_locn with
+	  | Not_found -> max_int
   in
-  let rec build_inc_lst n m = (* (0,m), (2,m), (4,m), ..., (n,m) *)
-    if n >= 0 then (n,m)::(build_inc_lst (n-2) m) else [] in
+  let rec build_inc_lst n m = (* [(n,m), (n-2,m), (n-4,m), ..., (0,m)] *)
+	if n >= 0 then (n,m)::(build_inc_lst (n-2) m) else [] in
   let winning_locns = if player_id = 0 then
   build_inc_lst (2*board.size - 2) (2*board.size - 2)
   else build_inc_lst (2*board.size - 2) 0 in
@@ -54,19 +55,19 @@ let get_valid_moves board player_id =
   (* possible wall placements *)
   (* only consider down and right, to avoid considering a pair of walls twice *)
   let rec build_inc_lst n = (* 0, 1, 2, ..., size-1 *)
-    if n < board.size then n::(build_inc_lst (n+1)) else [] in
+	if n < board.size then n::(build_inc_lst (n+1)) else [] in
   let all  = build_inc_lst 0 in
   let even = List.map (fun x -> 2 * x)     all in
   let odd  = List.map (fun x -> 2 * x + 1) all in
   let wall_placements =
-    List.flatten (
-      List.map (fun x ->
-        if x mod 2 = 1 then
-          List.map (fun y -> PlaceWall [(y,x); (y+2,x)]) even
-        else
-          List.map (fun y -> PlaceWall [(y,x); (y,x+2)]) odd
-      ) all
-    ) in
+	List.flatten (
+	  List.map (fun x ->
+		if x mod 2 = 1 then
+		  List.map (fun y -> PlaceWall [(y,x); (y+2,x)]) even
+		else
+		  List.map (fun y -> PlaceWall [(y,x); (y,x+2)]) odd
+	  ) all
+	) in
 
   (* Filter out invalid moves *)
   List.filter
@@ -85,19 +86,19 @@ as the difference between the distances of the players to their respective edge
 let minimax game player_id =
   let op_id = 1 - player_id in
   let pml = get_valid_moves game player_id in
-    let rec best game oid pid = function
-      |[] -> (-100, [])
-      |pm::ptl -> let pb = copy game in (commit_move pid pm pb);
-                  let oml = get_valid_moves pb oid in
-                  let rec worse b = function
-                    |[] -> 100
-                    |om::otl -> let ob = copy b in (commit_move oid om ob);
-                      let d = dist_to_win ob oid - dist_to_win ob pid in
-                      let w = worse b otl in if(d < w) then d else w
-                  in let w = worse pb oml in
-                  let (prevbest, bestmoves) = best game oid pid ptl in
-                  if (w == prevbest) then (w, pm::bestmoves) else
-                  if (w > prevbest) then (w, [pm]) else (prevbest, bestmoves)
+	let rec best game oid pid = function
+	  |[] -> (-100, [])
+	  |pm::ptl -> let pb = copy game in (commit_move pid pm pb);
+				  let oml = get_valid_moves pb oid in
+				  let rec worse b = function
+					|[] -> 100
+					|om::otl -> let ob = copy b in (commit_move oid om ob);
+					  let d = dist_to_win ob oid - dist_to_win ob pid in
+					  let w = worse b otl in if(d < w) then d else w
+				  in let w = worse pb oml in
+				  let (prevbest, bestmoves) = best game oid pid ptl in
+				  if (w == prevbest) then (w, pm::bestmoves) else
+				  if (w > prevbest) then (w, [pm]) else (prevbest, bestmoves)
   in snd (best game op_id player_id pml)
 
 let next_move game player_id =

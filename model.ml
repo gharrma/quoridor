@@ -146,9 +146,8 @@ let commit_move player_id move board =
     (board.players.(player_id) <- ((py, px), nwalls - 1))
 
 let ai_move player_id board =
-  failwith "TODO"
-  (* let m = Ai.next_move board player_id in
-  commit_move player_id m board *)
+  let m = Ai.next_move board player_id in
+  commit_move player_id m board
 
 let board_from_file s =
   failwith "TODO"
