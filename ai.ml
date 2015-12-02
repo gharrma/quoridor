@@ -20,17 +20,9 @@ let dist_to_win board player_id =
 	  in List.iter (chk_neighbor (py, px))
     [(py-1, px); (py+1, px); (py, px-1); (py, px+1)]
   done;
-  let dist_to loc =
-    let (ly, lx) = loc in
-    if (dist.(ly).(lx) > 0) then dist.(ly).(lx) else max_int
-  in
-  let rec build_inc_lst n m = (* [(n,m), (n,m-2), (n,m-4), ..., (n,0)] *)
-	if m >= 0 then (n,m)::(build_inc_lst n (m-1)) else [] in
-  let winning_locns = if player_id = 0 then
-    build_inc_lst (board.size - 1) (board.size - 1)
-  else build_inc_lst 0 (board.size - 1) in
-  List.fold_left min max_int (List.map dist_to winning_locns)
-
+  let dto y x = if (dist.(y).(x) > 0) then dist.(y).(x) else max_int in
+  let rec ans a b = if (b = 0) then dto a 0 else min (dto a b) (ans a (b-1)) in
+	if player_id = 0 then ans (n-1) (n-1) else ans 0 (n-1)
 
 (* Returns a list of all possible moves that a given player can make. *)
 let get_valid_moves board player_id =
