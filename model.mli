@@ -55,3 +55,7 @@ val validate_move : id -> move -> t -> bool
 
 (** Apply the given move to the game on behalf of the given player. *)
 val commit_move : id -> move -> t -> unit
+
+(** Reverts the game to the state before the given move, assuming the player
+    was in the given location. *)
+val undo : id -> move -> t -> loc -> unit

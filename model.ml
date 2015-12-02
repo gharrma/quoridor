@@ -71,11 +71,11 @@ let validate_move player_id move board =
   let ((py, px), nwalls) = (board.players).(player_id) in
   match move with
   | Move(y, x) -> if haswall board y x then false else begin
-    if(abs(px - x) + abs(py - y) = 2) then
+    if(abs(px - x) + abs(py - y) == 2) then
       not (haswall board ((py + y)/2) ((px + x)/2))
     else if(abs(px - x) + abs(py - y) > 4) then false (* else dist = 4 *)
     else let (my, mx) = ((py + y)/2, (px + x)/2) in
-    if (px = x || py = y) then (* jumping *)
+    if (px == x || py == y) then (* jumping *)
       haswall board my mx &&
       not (haswall board ((my + py)/2) ((mx + px)/2)) &&
       not (haswall board ((my + y)/2) ((mx + x)/2))
@@ -101,7 +101,7 @@ let validate_move player_id move board =
         |_ -> false
     end
   | PlaceWall wlist -> begin
-    if (nwalls = 0) then false else
+    if (nwalls == 0) then false else
     let rec canplace = function
     |[] -> true
     |(y, x)::tl -> not (haswall board y x) && canplace tl in
@@ -114,8 +114,8 @@ let validate_move player_id move board =
       if (x < 0 || y < 0 || x >= 2*n || y >= 2*n || !mark.(y/2).(x/2))
        then ()
       else begin !mark.(y/2).(x/2) <- true;
-      (if (y = 0) then top := true else
-       if (y = 2*n - 2) then bot := true else ());
+      (if (y == 0) then top := true else
+       if (y == 2*n - 2) then bot := true else ());
       for i = 0 to 3 do let (dy, dx) = dirs.(i) in
        if(not (haswall board (y + dy/2) (x + dx/2) ||
        List.mem (y + dy/2, x + dx/2) wlist))
@@ -141,9 +141,26 @@ let commit_move player_id move board =
       | [] -> ()
       | (y, x)::tl ->
         (board.board.(y).(x) <- Wall); updatewalls tl
-    in
-    (updatewalls wlist);
+    in (updatewalls wlist);
     (board.players.(player_id) <- ((py, px), nwalls - 1))
+
+
+let undo player_id move board prevloc =
+  let (_, nwalls) = (board.players).(player_id) in
+  let (py, px) = prevloc in
+  match move with
+  |Move(y, x) ->
+    (board.board.(py).(px) <- Player player_id);
+    (board.board.(y).(x) <- Space);
+    (board.players.(player_id) <- ((py, px), nwalls))
+
+  |PlaceWall wlist ->
+    let rec destroy = function
+    | [] -> ()
+    | (y, x)::tl ->
+      (board.board.(y).(x) <- NoWall); destroy tl
+    in (destroy wlist);
+    (board.players.(player_id) <- ((py, px), nwalls + 1))
 
 let board_from_file s =
   failwith "TODO"

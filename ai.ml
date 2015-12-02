@@ -67,13 +67,6 @@ let get_valid_moves board player_id =
   (fun m -> validate_move player_id m board)
   (moves @ wall_placements)
 
-
-(* Returns a copy of the game *)
-let copy game =
-  {game with board = Array.init (2*game.size - 1)
-                                (fun i -> Array.copy game.board.(i));
-             players = Array.copy game.players}
-
 (* Returns a list of movements that achieve the maximal value of minimal value
 the opponent can force the player into, where the value of a position is defined
 as the difference between the distances of the players to their respective edge
@@ -81,26 +74,40 @@ as the difference between the distances of the players to their respective edge
 let minimax game player_id =
   let op_id = 1 - player_id in
   let pml = get_valid_moves game player_id in
+  if List.length pml = 0 then Printf.printf "Oopsy daisy!\n%!";
   Printf.printf "now pscore = %d, enemy = %d\n%!"
             (dist_to_win game op_id) (dist_to_win game player_id);
+  let (ploc, oloc) = (fst game.players.(player_id), fst game.players.(op_id)) in
 	let rec best game oid pid = function
-	  |[] -> (-100, [])
-	  |pm::ptl -> let pb = copy game in (commit_move pid pm pb);
-				  let oml = get_valid_moves pb oid in
+	  |[] -> (-max_int, [])
+	  |pm::ptl -> (commit_move pid pm game);
+				  let oml = get_valid_moves game oid in
 				  let rec worse b = function
-					|[] -> 100
-					|om::otl -> let ob = copy b in (commit_move oid om ob);
-            let x = dist_to_win ob pid in let y = dist_to_win ob oid in
-					  let d = y*(16-y) - 8*x in
-					  let w = worse b otl in if (d < w) then d else w
-				  in let w = worse pb oml in
+					|[] -> max_int
+					|om::otl -> (commit_move oid om b);
+            let (x, y) = (dist_to_win b pid, dist_to_win b oid) in
+            let a = if (y <= 8) then y*(16-y) else 4*y + 32 in
+            let d = a - 8*x in (undo oid om b oloc); min d (worse b otl)
+				  in let w = worse game oml in (undo pid pm game ploc);
 				  let (prevbest, bestmoves) = best game oid pid ptl in
 				  if (w = prevbest) then (w, pm::bestmoves) else
 				  if (w > prevbest) then (w, [pm]) else (prevbest, bestmoves)
   in snd (best game op_id player_id pml)
 
 let next_move game player_id =
-  let moves = minimax game player_id in
+  let (ploc, nwalls) = game.players.(player_id) in
+  let moves = if (nwalls = 0) then
+  let pml = get_valid_moves game player_id in
+  let rec closer game pid = function
+    |[] -> (max_int, [])
+    |pm::ptl -> (commit_move pid pm game);
+                let d = dist_to_win game pid in
+                (undo pid pm game ploc);
+                let (prevbest, bestmoves) = closer game pid ptl in
+                if (d = prevbest) then (d, pm::bestmoves) else
+                if (d < prevbest) then (d, [pm]) else (prevbest, bestmoves)
+  in snd (closer game player_id pml) else minimax game player_id in
+  Printf.printf "Have %d moves available..\n%!" (List.length moves);
   let mv = List.nth moves (Random.int (List.length moves)) in
   match mv with
     |Move(x, y) -> (Printf.printf "let's move  to (%d,%d)\n%!" x y); mv
