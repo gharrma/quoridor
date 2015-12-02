@@ -24,7 +24,7 @@ let dist_to_win board player_id =
 		  if qx >= 0 && qy >= 0 && qx <= max_ordinate && qy <= max_ordinate &&
   				not ((board.board).((py+qy)/2).((px+qx)/2) = Wall) &&
   				not (Hashtbl.mem vis (py, px)) then
-			  next_nodes := !next_nodes + 1;
+			  incr next_nodes;
 			  Queue.push (py, px) q;
         Hashtbl.add vis (py, px) true;
 	  in
