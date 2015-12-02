@@ -226,7 +226,7 @@ and loop (players:player list) (cur_player:int) =
             else if (mody <= 50 && modx > 80) then (* Down *)
               let l = [(my, mx);(my+1, mx);(my+2, mx)] in
               let mv = validate_move cur_player (PlaceWall(l)) (!save) in
-              if mv then 
+              if mv then
                 let () = commit_move cur_player (PlaceWall(l)) (!save) in
                 true
               else false
@@ -240,7 +240,7 @@ and loop (players:player list) (cur_player:int) =
             else if (modx > 80 && mody > 50) then (* Up *)
               let l = [(my, mx);(my-1, mx);(my-2, mx)] in
               let mv = validate_move cur_player (PlaceWall(l)) (!save) in
-              if mv then 
+              if mv then
                 let () = commit_move cur_player (PlaceWall(l)) (!save) in
                 true
               else false
@@ -249,7 +249,7 @@ and loop (players:player list) (cur_player:int) =
               let mv = validate_move cur_player (PlaceWall(l)) (!save) in
               if mv then
                 let () = commit_move cur_player (PlaceWall(l)) (!save) in
-                true 
+                true
               else false
             else false
           in
@@ -304,7 +304,7 @@ and players (c1:controller) (c2:controller) (c:color) (c':color) =
     {cont = c1; color = c; pos_x = 8; pos_y = 0} in
   let pl_2 =
     {cont = c2; color = c'; pos_x = 8; pos_y = 16} in
-  loop [pl_1;pl_2] 0
+  loop [pl_1;pl_2] (Random.int 2)
 
 (* Loop for instructions menu *)
 and howToPlayLoop () =
