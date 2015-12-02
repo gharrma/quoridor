@@ -68,7 +68,25 @@ let get_valid_moves board player_id =
   (moves @ wall_placements)
 
 let minimax game player_id =
-  failwith "TODO"
+  let op_id = 1 - player_id in
+  let pml = get_valid_moves game player_id in
+    let rec best game oid pid = function
+      |[] -> (-100, [])
+      |pm::ptl -> let pb = {game with board = Array.copy game.board} in
+                  (commit_move pid pm pb);
+                  let oml = get_valid_moves pb oid in
+                  let rec worse b = function
+                    |[] -> 100
+                    |om::otl -> let ob = {b with board = Array.copy b.board} in
+                      (commit_move oid om ob);
+                      let d = dist_to_win ob oid - dist_to_win ob pid in
+                      let w = worse b otl in if(d < w) then d else w
+                  in let w = worse pb oml in
+                  let (prevbest, bestmoves) = best game oid pid ptl in
+                  if (w == prevbest) then (w, pm::bestmoves) else
+                  if (w > prevbest) then (w, [pm]) else (prevbest, bestmoves)
+  in let bestmoves = snd (best game op_id player_id pml)
+  in let rn = Random.int (List.length bestmoves) in List.nth bestmoves rn
 
 let next_move game player_id =
   failwith "TODO"
