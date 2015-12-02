@@ -78,7 +78,10 @@ let get_valid_moves board player_id =
 let copy game =
   {game with board = Array.init game.size (fun i -> Array.copy game.board.(i))}
 
-
+(* Returns a list of movements that achieve the maximal value of minimal value
+the opponent can force the player into, where the value of a position is defined
+as the difference between the distances of the players to their respective edge
+ of the board *)
 let minimax game player_id =
   let op_id = 1 - player_id in
   let pml = get_valid_moves game player_id in
@@ -95,8 +98,8 @@ let minimax game player_id =
                   let (prevbest, bestmoves) = best game oid pid ptl in
                   if (w == prevbest) then (w, pm::bestmoves) else
                   if (w > prevbest) then (w, [pm]) else (prevbest, bestmoves)
-  in let bestmoves = snd (best game op_id player_id pml)
-  in let rn = Random.int (List.length bestmoves) in List.nth bestmoves rn
+  in snd (best game op_id player_id pml)
 
 let next_move game player_id =
-  failwith "TODO"
+  let moves = minimax game player_id in
+  List.nth moves (Random.int (List.length moves))
