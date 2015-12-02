@@ -25,10 +25,11 @@ let dist_to_win board player_id =
 		  let max_ordinate = (2*board.size - 2) in
 		  if qx >= 0 && qy >= 0 && qx <= max_ordinate && qy <= max_ordinate &&
   				not ((board.board).((py+qy)/2).((px+qx)/2) = Wall) &&
-  				not (Hashtbl.mem vis (qy, qx)) then
+  				not (Hashtbl.mem vis (qy, qx)) then begin
 			  incr next_nodes;
 			  Queue.push (qy, qx) q;
         Hashtbl.add vis (qy, qx) true;
+      end
 	  in
 	  List.iter (chk_neighbor (py, px)) [(py-2, px); (py+2, px); (py, px-2); (py, px+2)]
   done;
