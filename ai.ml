@@ -20,8 +20,8 @@ let dist_to_win board player_id =
           cur_nodes := !next_nodes;
           next_nodes := 0;
       let chk_neighbor (py, px) (qy, qx) =
-          if qx >= 0 && qy >= 0 && qx <= 16 && qy <= 16 &&
-                not ((board.board).(py+qy/2).(px+qx/2) = Wall) &&
+          if qx >= 0 && qy >= 0 && qx <= board.size && qy <= board.size &&
+                not ((board.board).((py+qy)/2).((px+qx)/2) = Wall) &&
                 not (Hashtbl.mem vis (px, py)) then
               next_nodes := !next_nodes + 1;
               Queue.push (py, px) q;
@@ -32,9 +32,11 @@ let dist_to_win board player_id =
       try Hashtbl.find dist dest_locn with
       | Not_found -> max_int
   in
+  let rec build_inc_lst n m = (* (0,m), (2,m), (4,m), ..., (n,m) *)
+    if n >= 0 then (n,m)::(build_inc_lst (n-2) m) else [] in
   let winning_locns = if player_id = 0 then
-  [(1, 16); (3, 16); (5, 16); (7, 16); (9, 16); (11, 16); (13, 16); (15, 16)]
-  else [(1, 0); (3, 0); (5, 0); (7, 0); (9, 0); (11, 0); (13, 0); (15, 0)] in
+  build_inc_lst (2*board.size - 2) (2*board.size - 2)
+  else build_inc_lst (2*board.size - 2) 0 in
   List.fold_left min 0 (List.map dist_to winning_locns)
 
 
