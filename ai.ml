@@ -38,12 +38,12 @@ let dist_to_win board player_id =
 	  try Hashtbl.find dist dest_locn with
 	  | Not_found -> max_int
   in
-  let rec build_inc_lst n m = (* [(n,m), (n-2,m), (n-4,m), ..., (0,m)] *)
-	if n >= 0 then (n,m)::(build_inc_lst (n-2) m) else [] in
+  let rec build_inc_lst n m = (* [(n,m), (n,m-2), (n,m-4), ..., (m,0)] *)
+	if m >= 0 then (n,m)::(build_inc_lst n (m-2)) else [] in
   let winning_locns = if player_id = 0 then
-  build_inc_lst (2*board.size - 2) (2*board.size - 2)
-  else build_inc_lst (2*board.size - 2) 0 in
-  List.fold_left min 0 (List.map dist_to winning_locns)
+    build_inc_lst (2*board.size - 2) (2*board.size - 2)
+  else build_inc_lst 0 (2*board.size - 2) in
+  List.fold_left min max_int (List.map dist_to winning_locns)
 
 
 (* Returns a list of all possible moves that a given player can make. *)
