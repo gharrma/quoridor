@@ -32,7 +32,9 @@ let dist_to_win board player_id =
       try Hashtbl.find dist dest_locn with
       | Not_found -> max_int
   in
-  let winning_locns = if player_id = 0 then [(1, 16)] else [(1, 0)] in
+  let winning_locns = if player_id = 0 then
+  [(1, 16); (3, 16); (5, 16); (7, 16); (9, 16); (11, 16); (13, 16); (15, 16)]
+  else [(1, 0); (3, 0); (5, 0); (7, 0); (9, 0); (11, 0); (13, 0); (15, 0)] in
   List.fold_left min 0 (List.map dist_to winning_locns)
 
 
