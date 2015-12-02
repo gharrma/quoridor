@@ -96,8 +96,7 @@ let minimax game player_id =
                   let (prevbest, bestmoves) = best game oid pid ptl in
                   if (w == prevbest) then (w, pm::bestmoves) else
                   if (w > prevbest) then (w, [pm]) else (prevbest, bestmoves)
-  in let bestmoves = snd (best game op_id player_id pml)
-  in let rn = Random.int (List.length bestmoves) in List.nth bestmoves rn
+  in snd (best game op_id player_id pml)
 
 let next_move game player_id =
   let moves = minimax game player_id in
