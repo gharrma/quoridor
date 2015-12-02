@@ -5,7 +5,7 @@ let dist_to_win game player_id =
   failwith "TODO"
 
 (* Returns a list of all possible moves that a given player can make. *)
-let get_valid_moves game player_id = 
+let get_valid_moves game player_id =
   failwith "TODO"
 
 let minimax game player_id =
@@ -16,6 +16,9 @@ let next_move game player_id =
     Move pos
     (* TODO: thanksgiving *)
 
+(* Returns the distance of player with specified id fron the dest_locn according
+ * to the current board configuration. Returns -1 if des_locn cannot be reached.
+ *)
 let distance_to_pos board player_id dest_locn =
     let (locn, nwalls) = (board.players).(player_id) in
     let q = Queue.create() in
