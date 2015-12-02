@@ -14,9 +14,9 @@ let dist_to_win board player_id =
   while (not (Queue.is_empty q)) do
 	  let (py, px) = Queue.pop q in
 	  Hashtbl.add dist (py, px) !depth;
-	  cur_nodes := !cur_nodes - 1;
+	  decr cur_nodes;
 	  if !cur_nodes = 0 then
-		  depth := !depth + 1;
+		  incr depth;
 		  cur_nodes := !next_nodes;
 		  next_nodes := 0;
 	  let chk_neighbor (py, px) (qy, qx) =
