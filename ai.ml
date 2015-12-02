@@ -68,9 +68,9 @@ let get_valid_moves board player_id =
 	List.flatten (
 	  List.map (fun x ->
 		if x mod 2 = 1 then
-		  List.map (fun y -> PlaceWall [(y,x); (y+2,x)]) even
+		  List.map (fun y -> PlaceWall [(y,x); (y+1,x); (y+2,x)]) even
 		else
-		  List.map (fun y -> PlaceWall [(y,x); (y,x+2)]) odd
+		  List.map (fun y -> PlaceWall [(y,x); (y,x+1); (y,x+2)]) odd
 	  ) all
 	) in
 
