@@ -286,7 +286,7 @@ and loop (players:player list) (cur_player:int) =
   else
     let next = next_player players cur_player in
     instance := AiThink; draw [] players cur_player;
-    let _ = save := ai_move cur_player (!save) in
+    let () = commit_move cur_player (Ai.next_move !save cur_player) !save in
     instance := Blank; draw [] players next; loop players next
 
 

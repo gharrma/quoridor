@@ -55,6 +55,3 @@ val validate_move : id -> move -> t -> bool
 
 (** Apply the given move to the game on behalf of the given player. *)
 val commit_move : id -> move -> t -> unit
-
-(** [ai_move player_id board] requests a move from the AI. *)
-val ai_move : id -> t -> t
