@@ -67,18 +67,22 @@ let get_valid_moves board player_id =
   (fun m -> Model.validate_move player_id m board)
   (moves @ wall_placements)
 
+
+(* Returns a copy of the game *)
+let copy game =
+  {game with board = Array.init game.size (fun i -> Array.copy game.board.(i))}
+
+
 let minimax game player_id =
   let op_id = 1 - player_id in
   let pml = get_valid_moves game player_id in
     let rec best game oid pid = function
       |[] -> (-100, [])
-      |pm::ptl -> let pb = {game with board = Array.copy game.board} in
-                  (commit_move pid pm pb);
+      |pm::ptl -> let pb = copy game in (commit_move pid pm pb);
                   let oml = get_valid_moves pb oid in
                   let rec worse b = function
                     |[] -> 100
-                    |om::otl -> let ob = {b with board = Array.copy b.board} in
-                      (commit_move oid om ob);
+                    |om::otl -> let ob = copy b in (commit_move oid om ob);
                       let d = dist_to_win ob oid - dist_to_win ob pid in
                       let w = worse b otl in if(d < w) then d else w
                   in let w = worse pb oml in
