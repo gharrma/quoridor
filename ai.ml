@@ -7,12 +7,12 @@ let dist_to_win board player_id =
   let vis = Hashtbl.create 100 in
   let dist = Hashtbl.create 100 in
   Queue.push locn q;
+  Hashtbl.add vis locn true;
   let cur_nodes = ref 1 in
   let next_nodes = ref 0 in
   let depth = ref 0 in
   while (not (Queue.is_empty q)) do
 	  let (py, px) = Queue.pop q in
-	  Hashtbl.add vis (py, px) true;
 	  Hashtbl.add dist (py, px) !depth;
 	  cur_nodes := !cur_nodes - 1;
 	  if !cur_nodes = 0 then
@@ -22,10 +22,11 @@ let dist_to_win board player_id =
 	  let chk_neighbor (py, px) (qy, qx) =
 		  let max_ordinate = (2*board.size - 2) in
 		  if qx >= 0 && qy >= 0 && qx <= max_ordinate && qy <= max_ordinate &&
-				not ((board.board).((py+qy)/2).((px+qx)/2) = Wall) &&
-				not (Hashtbl.mem vis (py, px)) then
+  				not ((board.board).((py+qy)/2).((px+qx)/2) = Wall) &&
+  				not (Hashtbl.mem vis (py, px)) then
 			  next_nodes := !next_nodes + 1;
 			  Queue.push (py, px) q;
+        Hashtbl.add vis (py, px) true;
 	  in
 	  List.iter (chk_neighbor (py, px)) [(py-2, px); (py+2, px); (py, px-2); (py, px+2)]
   done;
