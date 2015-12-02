@@ -80,14 +80,14 @@ let validate_move player_id move board =
       not (haswall board ((my + py)/2) ((mx + px)/2)) &&
       not (haswall board ((my + y)/2) ((mx + x)/2))
     else (* diagonal move *)
-      let can1 = 
+      let can1 =
         not (haswall board py mx) &&
         not (haswall board my x) &&
         ((let (wy, wx) = reflect (py, mx) (py, x) in haswall board wy wx)
         ||
         (let (qy, qx) = reflect (py, px) (py, x) in haswall board qy qx))
       in
-      let can2 = 
+      let can2 =
         not (haswall board my px) &&
         not (haswall board y mx) &&
         ((let (wy, wx) = reflect (my, px) (y, px) in haswall board wy wx)
@@ -139,7 +139,7 @@ let commit_move player_id move board =
   | PlaceWall wlist ->
     let rec updatewalls = function
       | [] -> ()
-      | (y, x)::tl -> 
+      | (y, x)::tl ->
         (board.board.(y).(x) <- Wall); updatewalls tl
     in
     (updatewalls wlist);
@@ -147,6 +147,8 @@ let commit_move player_id move board =
 
 let ai_move player_id board =
   failwith "TODO"
+  (* let m = Ai.next_move board player_id in
+  commit_move player_id m board *)
 
 let board_from_file s =
   failwith "TODO"

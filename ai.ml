@@ -1,4 +1,4 @@
-include Model
+open Model
 
 (* Returns the number of moves required to win for a given player. *)
 let dist_to_win board player_id =
@@ -19,12 +19,14 @@ let dist_to_win board player_id =
           depth := !depth + 1;
           cur_nodes := !next_nodes;
           next_nodes := 0;
-      let chk_neighbor (px, py) =
-          if px >= 0 && py >= 0 && px <= 16 && py <= 16 && not (Hashtbl.mem vis (px, py)) then
+      let chk_neighbor (py, px) (qy, qx) =
+          if qx >= 0 && qy >= 0 && qx <= 16 && qy <= 16 &&
+                not ((board.board).(py+qy/2).(px+qx/2) = Wall) &&
+                not (Hashtbl.mem vis (px, py)) then
               next_nodes := !next_nodes + 1;
-              Queue.push (px, py) q;
+              Queue.push (py, px) q;
       in
-      List.iter chk_neighbor [(py-2, px); (py+2, px); (py, px-2); (py, px+2)]
+      List.iter (chk_neighbor (py, px)) [(py-2, px); (py+2, px); (py, px-2); (py, px+2)]
   done;
   let dist_to dest_locn =
       try Hashtbl.find dist dest_locn with
@@ -64,7 +66,7 @@ let get_valid_moves board player_id =
 
   (* Filter out invalid moves *)
   List.filter
-  (fun m -> Model.validate_move player_id m board)
+  (fun m -> validate_move player_id m board)
   (moves @ wall_placements)
 
 
