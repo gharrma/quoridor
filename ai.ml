@@ -16,9 +16,9 @@ let dist_to_win board player_id =
     Printf.printf "hashtable #keys: %d\n" (Hashtbl.length vis); *)
 	  let (py, px) = Queue.pop q in
 	  Hashtbl.add dist (py, px) !depth;
-	  cur_nodes := !cur_nodes - 1;
+	  decr cur_nodes;
 	  if !cur_nodes = 0 then
-		  depth := !depth + 1;
+		  incr depth;
 		  cur_nodes := !next_nodes;
 		  next_nodes := 0;
 	  let chk_neighbor (py, px) (qy, qx) =
@@ -26,7 +26,7 @@ let dist_to_win board player_id =
 		  if qx >= 0 && qy >= 0 && qx <= max_ordinate && qy <= max_ordinate &&
   				not ((board.board).((py+qy)/2).((px+qx)/2) = Wall) &&
   				not (Hashtbl.mem vis (qy, qx)) then
-			  next_nodes := !next_nodes + 1;
+			  incr next_nodes;
 			  Queue.push (qy, qx) q;
         Hashtbl.add vis (qy, qx) true;
 	  in
