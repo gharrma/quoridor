@@ -81,6 +81,8 @@ as the difference between the distances of the players to their respective edge
 let minimax game player_id =
   let op_id = 1 - player_id in
   let pml = get_valid_moves game player_id in
+  Printf.printf "now pscore = %d, enemy = %d\n%!"
+            (dist_to_win game op_id) (dist_to_win game player_id);
 	let rec best game oid pid = function
 	  |[] -> (-100, [])
 	  |pm::ptl -> let pb = copy game in (commit_move pid pm pb);
@@ -88,8 +90,9 @@ let minimax game player_id =
 				  let rec worse b = function
 					|[] -> 100
 					|om::otl -> let ob = copy b in (commit_move oid om ob);
-					  let d = dist_to_win ob oid - dist_to_win ob pid in
-					  let w = worse b otl in if(d < w) then d else w
+            let x = dist_to_win ob pid in let y = dist_to_win ob oid in
+					  let d = y*(16-y) - 8*x in
+					  let w = worse b otl in if (d < w) then d else w
 				  in let w = worse pb oml in
 				  let (prevbest, bestmoves) = best game oid pid ptl in
 				  if (w = prevbest) then (w, pm::bestmoves) else
@@ -98,4 +101,7 @@ let minimax game player_id =
 
 let next_move game player_id =
   let moves = minimax game player_id in
-  List.nth moves (Random.int (List.length moves))
+  let mv = List.nth moves (Random.int (List.length moves)) in
+  match mv with
+    |Move(x, y) -> (Printf.printf "let's move  to (%d,%d)\n%!" x y); mv
+    |_ -> (); mv
