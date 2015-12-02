@@ -30,6 +30,7 @@ type loc = (int * int)
   * Coords for POS 3 -> (2,0)
 *)
 type t = {
+  size : int;
   board : board_object array array;
   players : (loc * int) array
 }
@@ -49,8 +50,11 @@ val create_board : int -> t
 val board_from_file : string -> t
 
 (** [validate_move player_id move board] validates a movement or wall placement
-    by a player, returning whether the move succeeded and updated the board. *)
-val validate_move : id -> move -> t -> bool * t
+    by a player, returning whether the move is allowed. *)
+val validate_move : id -> move -> t -> bool
+
+(** Apply the given move to the game on behalf of the given player. *)
+val commit_move : id -> move -> t -> unit
 
 (** [ai_move player_id board] requests a move from the AI. *)
 val ai_move : id -> t -> t

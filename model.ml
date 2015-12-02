@@ -16,6 +16,7 @@ type board_object =
 type loc = (int * int)
 
 type t = {
+  size : int;
   board : board_object array array;
   players : (loc * int) array
 }
@@ -50,7 +51,7 @@ let create_board size =
   let fill_row y = Array.init rep_size (fill_space y) in
   let board = Array.init rep_size fill_row in
 
-  { board; players }
+  { size; board; players }
 
 (* Returns whether a location is unacessible, either because it has a wall,
  is not a valid board location or is occupied by a player. *)
@@ -69,9 +70,9 @@ let reflect a b =
 let validate_move player_id move board =
   let ((py, px), nwalls) = (board.players).(player_id) in
   match move with
-  |Move(y, x) -> let canmove = if haswall board y x then false else begin
-      if(abs(px - x) + abs(py - y) == 2) then
-        not (haswall board ((py + y)/2) ((px + x)/2))
+  | Move(y, x) -> if haswall board y x then false else begin
+    if(abs(px - x) + abs(py - y) == 2) then
+      not (haswall board ((py + y)/2) ((px + x)/2))
     else if(abs(px - x) + abs(py - y) > 4) then false (* else dist = 4 *)
     else let (my, mx) = ((py + y)/2, (px + x)/2) in
     if (px == x || py == y) then (* jumping *)
@@ -79,29 +80,27 @@ let validate_move player_id move board =
       not (haswall board ((my + py)/2) ((mx + px)/2)) &&
       not (haswall board ((my + y)/2) ((mx + x)/2))
     else (* diagonal move *)
-    let can1 = not (haswall board py mx) &&
-               not (haswall board my x) &&
-               ((let (wy, wx) = reflect (py, mx) (py, x) in haswall board wy wx)
-               ||
-               (let (qy, qx) = reflect (py, px) (py, x) in haswall board qy qx))
-               in
-    let can2 = not (haswall board my px) &&
-               not (haswall board y mx) &&
-               ((let (wy, wx) = reflect (my, px) (y, px) in haswall board wy wx)
-               ||
-               (let (qy, qx) = reflect (py, px) (y, px) in haswall board qy qx))
-               in
-    match (board.board.(py).(x), board.board.(y).(px)) with
-      |(Player a, Player b) -> can1 || can2
-      |(Player a, _) -> can1
-      |(_, Player b) -> can2
-      |_ -> false
-  end in if (canmove) then begin (* update the board *)
-    (board.board.(py).(px) <- Space);
-    (board.board.(y).(x) <- Player player_id);
-    (board.players.(player_id) <- ((y, x), nwalls));
-    (canmove, board) end else (false, board)
-  |PlaceWall wlist -> let canmove = begin
+      let can1 = 
+        not (haswall board py mx) &&
+        not (haswall board my x) &&
+        ((let (wy, wx) = reflect (py, mx) (py, x) in haswall board wy wx)
+        ||
+        (let (qy, qx) = reflect (py, px) (py, x) in haswall board qy qx))
+      in
+      let can2 = 
+        not (haswall board my px) &&
+        not (haswall board y mx) &&
+        ((let (wy, wx) = reflect (my, px) (y, px) in haswall board wy wx)
+        ||
+        (let (qy, qx) = reflect (py, px) (y, px) in haswall board qy qx))
+      in
+      match (board.board.(py).(x), board.board.(y).(px)) with
+        |(Player a, Player b) -> can1 || can2
+        |(Player a, _) -> can1
+        |(_, Player b) -> can2
+        |_ -> false
+    end
+  | PlaceWall wlist -> begin
     if (nwalls == 0) then false else
     let rec canplace = function
     |[] -> true
@@ -127,18 +126,27 @@ let validate_move player_id move board =
     let top = ref false in
     (visit mark top bot (fst board.players.(1)));
     ans0 && !top
-    end in if (canmove) then begin (* update the board *)
+    end
+
+let commit_move player_id move board =
+  let ((py, px), nwalls) = (board.players).(player_id) in
+  match move with
+  | Move(y, x) ->
+    (board.board.(py).(px) <- Space);
+    (board.board.(y).(x) <- Player player_id);
+    (board.players.(player_id) <- ((y, x), nwalls))
+
+  | PlaceWall wlist ->
     let rec updatewalls = function
-    |[] -> ()
-    |(y, x)::tl -> (board.board.(y).(x) <- Wall); updatewalls tl in
+      | [] -> ()
+      | (y, x)::tl -> 
+        (board.board.(y).(x) <- Wall); updatewalls tl
+    in
     (updatewalls wlist);
-    (board.players.(player_id) <- ((py, px), nwalls - 1));
-    (canmove, board) end else (false, board)
+    (board.players.(player_id) <- ((py, px), nwalls - 1))
 
 let ai_move player_id board =
   failwith "TODO"
 
 let board_from_file s =
   failwith "TODO"
-
-(*let _ = print_game (create_board 7)*)

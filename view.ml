@@ -211,9 +211,9 @@ and loop (players:player list) (cur_player:int) =
         let mx = (event.mouse_x / 100) * 2 + if modx >= 80 then 1 else 0 in
         if(modx < 80 && mody < 80) then
           let mv = validate_move cur_player (Move(my,mx)) (!save) in
-          if (fst mv) then
+          if mv then
+            let () = commit_move cur_player (Move(my,mx)) (!save) in
             let play = List.nth players cur_player in
-            save := (snd mv);
             play.pos_x <- mx; play.pos_y <- my;
             let next = next_player players cur_player in
             instance := Blank; draw [] players next; next
@@ -226,19 +226,31 @@ and loop (players:player list) (cur_player:int) =
             else if (mody <= 50 && modx > 80) then (* Down *)
               let l = [(my, mx);(my+1, mx);(my+2, mx)] in
               let mv = validate_move cur_player (PlaceWall(l)) (!save) in
-              if (fst mv) then let _ = save := (snd mv) in true else false
+              if mv then 
+                let () = commit_move cur_player (PlaceWall(l)) (!save) in
+                true
+              else false
             else if (modx <= 50 && mody > 80) then (* Left *)
               let l = [(my, mx);(my, mx-1);(my, mx-2)] in
               let mv = validate_move cur_player (PlaceWall(l)) (!save) in
-              if (fst mv) then let _ = save := (snd mv) in true else false
+              if mv then
+                let () = commit_move cur_player (PlaceWall(l)) (!save) in
+                true
+              else false
             else if (modx > 80 && mody > 50) then (* Up *)
               let l = [(my, mx);(my-1, mx);(my-2, mx)] in
               let mv = validate_move cur_player (PlaceWall(l)) (!save) in
-              if (fst mv) then let _ = save := (snd mv) in true else false
+              if mv then 
+                let () = commit_move cur_player (PlaceWall(l)) (!save) in
+                true
+              else false
             else if (mody > 80 && modx > 50) then (* Right *)
               let l = [(my, mx);(my, mx+1);(my, mx+2)] in
               let mv = validate_move cur_player (PlaceWall(l)) (!save) in
-              if (fst mv) then let _ = save := (snd mv) in true else false
+              if mv then
+                let () = commit_move cur_player (PlaceWall(l)) (!save) in
+                true 
+              else false
             else false
           in
           if accept
