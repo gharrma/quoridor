@@ -287,6 +287,9 @@ and loop (players:player list) (cur_player:int) =
     let next = next_player players cur_player in
     instance := AiThink; draw [] players cur_player;
     let () = commit_move cur_player (Ai.next_move !save cur_player) !save in
+    let play = List.nth players cur_player in
+    play.pos_x <- (snd (fst (!save).players.(cur_player)));
+    play.pos_y <- (fst (fst (!save).players.(cur_player)));
     instance := Blank; draw [] players next; loop players next
 
 

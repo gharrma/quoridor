@@ -129,7 +129,6 @@ let validate_move player_id move board =
     end
 
 let commit_move player_id move board =
-
   let ((py, px), nwalls) = (board.players).(player_id) in
   match move with
   | Move(y, x) ->
