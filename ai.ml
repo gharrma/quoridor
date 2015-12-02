@@ -77,7 +77,8 @@ let get_valid_moves board player_id =
 
 (* Returns a copy of the game *)
 let copy game =
-  {game with board = Array.init game.size (fun i -> Array.copy game.board.(i))}
+  {game with board = Array.init (2*game.size - 1)
+                                (fun i -> Array.copy game.board.(i))}
 
 (* Returns a list of movements that achieve the maximal value of minimal value
 the opponent can force the player into, where the value of a position is defined
