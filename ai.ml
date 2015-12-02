@@ -12,16 +12,14 @@ let dist_to_win board player_id =
   let next_nodes = ref 0 in
   let depth = ref 0 in
   while (not (Queue.is_empty q)) do
-    (* Printf.printf "queue length: %d\n" (Queue.length q);
-    Printf.printf "hashtable #keys: %d\n" (Hashtbl.length vis); *)
 	  let (py, px) = Queue.pop q in
 	  Hashtbl.add dist (py, px) !depth;
-	  decr cur_nodes;
 	  if !cur_nodes = 0 then begin
 		  incr depth;
 		  cur_nodes := !next_nodes;
 		  next_nodes := 0
     end;
+    decr cur_nodes;
 	  let chk_neighbor (py, px) (qy, qx) =
 		  let max_ordinate = (2*board.size - 2) in
 		  if qx >= 0 && qy >= 0 && qx <= max_ordinate && qy <= max_ordinate &&
@@ -38,12 +36,13 @@ let dist_to_win board player_id =
 	  try Hashtbl.find dist dest_locn with
 	  | Not_found -> max_int
   in
-  let rec build_inc_lst n m = (* [(n,m), (n,m-2), (n,m-4), ..., (m,0)] *)
+  let rec build_inc_lst n m = (* [(n,m), (n,m-2), (n,m-4), ..., (n,0)] *)
 	if m >= 0 then (n,m)::(build_inc_lst n (m-2)) else [] in
   let winning_locns = if player_id = 0 then
     build_inc_lst (2*board.size - 2) (2*board.size - 2)
   else build_inc_lst 0 (2*board.size - 2) in
-  List.fold_left min max_int (List.map dist_to winning_locns)
+  let res = List.fold_left min max_int (List.map dist_to winning_locns) in
+  res
 
 
 (* Returns a list of all possible moves that a given player can make. *)
