@@ -3,6 +3,9 @@ open Model
 (* Returns the number of moves required to win for a given player. *)
 let dist_to_win board player_id =
   let ((iy, ix), _) = (board.players).(player_id) in
+  (match board.board.(iy).(ix) with
+  |Player player_id -> ()
+  |_ -> (Printf.printf "ADASDASDASDADASDSADASDA\n%!"));
   let q = Queue.create() in
   let n = board.size in
   let dist = Array.init n (fun x -> Array.init n (fun x -> -1)) in
@@ -23,6 +26,73 @@ let dist_to_win board player_id =
   let dto y x = if (dist.(y).(x) >= 0) then dist.(y).(x) else max_int in
   let rec ans a b = if (b = 0) then dto a 0 else min (dto a b) (ans a (b-1)) in
   if player_id = 0 then ans (n-1) (n-1) else ans 0 (n-1)
+
+let print_game t =
+  Array.iter (fun row ->
+    Array.iter (function
+      | NoWall    -> print_string ". "
+      | Wall      -> print_string "+ "
+      | Space     -> print_string "  "
+      | Player id -> print_int id; print_char ' '
+    ) row; print_newline()
+  ) t.board
+
+(* Returns list consisting of a possible path to victory (no jumping),
+  where the head is the current position of the player
+  and the last element is a winning position. *)
+let rec path_to_win game player_id =
+  let (py, px) = fst game.players.(player_id) in let op_id = 1 - player_id in
+  let (oy, ox) = fst game.players.(op_id) in
+  if(dist_to_win game player_id = 0) then [(py, px)] else let n = game.size in
+  let mlist = List.filter (fun (dy, dx) ->
+                           let (my, mx) = (py + dy, px + dx) in
+                           mx >= 0 && my >= 0 && mx <= 2*n-2 && my <= 2*n-2 &&
+                           not (game.board.(py + dy/2).(px + dx/2) = Wall))
+                          [(0,2); (0,-2); (2,0); (-2,0)] in
+  let rec closest = function
+    |[] -> (Move(py, px), max_int)
+    |(dy, dx)::ptl -> let m = Move(py+dy, px+dx) in
+                      (commit_move player_id m game);
+                      let d = dist_to_win game player_id in
+                      if (d > 1000) then (print_game game);
+                      (undo player_id m game (py, px));
+                      (game.board.(oy).(ox) <- Player op_id);
+                      let (pm, dis) = closest ptl in if (d < dis) then (m, d)
+                      else (pm, dis)
+  in let (pm, dis) = closest mlist in (commit_move player_id pm game);
+  let path = path_to_win game player_id in
+  (undo player_id pm game (py, px));
+  (game.board.(oy).(ox) <- Player op_id);
+  (py, px)::path
+
+let pathtoarray path n =
+  let ans = Array.init (2*n-1) (fun y -> Array.init (2*n-1) (fun x -> false)) in
+  let rec fill = function
+    |[] -> ()
+    |[(y, x)] -> (ans.(y).(x) <- true);
+    |(ay, ax)::(by, bx)::c -> (ans.(ay).(ax) <- true); (ans.(by).(bx) <- true);
+                              (ans.((ay+by)/2).((ax+bx)/2) <- true);
+                              fill ((by,bx)::c)
+  in (fill path); ans
+
+(* Checks whether the move consists of a wall cutting the given path. *)
+let cutspath move patharray =
+  match move with
+  |Move(y, x) -> false
+  |PlaceWall wlist -> let rec checkwalls = function
+                      |[] -> false
+                      |(wy, wx)::wtl -> patharray.(wy).(wx) || checkwalls wtl
+                    in checkwalls wlist
+
+(* Returns whether a location is unacessible, either because it has a wall,
+ is not a valid board location or is occupied by a player. *)
+let haswall board y x =
+  let n = Array.length board.board in
+  if(y < 0 || y >= n || x < 0 || x >= n) then true else
+  match (board.board).(y).(x) with
+  |Wall -> true
+  |Player i -> true
+  |_ -> false
 
 (* Returns a list of all possible moves that a given player can make. *)
 let get_valid_moves board player_id =
@@ -54,62 +124,35 @@ let get_valid_moves board player_id =
   ) in
 
   (* Filter out invalid moves *)
+  let parray = pathtoarray (path_to_win board player_id) board.size in
+
   List.filter
-  (fun m -> validate_move player_id m board)
+  (fun m -> match m with
+            |Move(y, x) -> validate_move player_id m board
+            |PlaceWall wlist -> begin
+              if (nwalls = 0) then false else
+              let rec canplace = function
+                |[] -> true
+                |(y, x)::tl -> not (haswall board y x) && canplace tl in
+              if (not (canplace wlist)) then false else
+              if (cutspath m parray) then
+              validate_move player_id m board else true
+            end)
   (moves @ wall_placements)
 
- (* Returns list consisting of a possible path to victory (no jumping),
-  where the head is the current position of the player
-  and the last element is a winning position. *)
-let rec path_to_win game player_id =
-  let (py, px) = fst game.players.(player_id) in
-  if(dist_to_win game player_id = 0) then [(py, px)] else let n = game.size in
-  let mlist = List.filter (fun (dy, dx) ->
-                           let (my, mx) = (py + dy/2, px + dx/2) in
-                           mx >= 0 && my >= 0 && mx <= 2*n-2 && my <= 2*n-2 &&
-                           not (game.board.(my).(mx) = Wall))
-                          [(0,2); (0,-2); (2,0); (-2,0)] in
-  let rec closest = function
-    |[] -> (Move(py, px), max_int)
-    |(dy, dx)::ptl -> let m = Move(py+dy, px+dx) in
-                      (commit_move player_id m game);
-                      let d = dist_to_win game player_id in
-                      (undo player_id m game (py, px));
-                      let (pm, dis) = closest ptl in if (d < dis) then (m, d)
-                      else (pm, dis)
-  in let pm = fst (closest mlist) in (commit_move player_id pm game);
-  let path = path_to_win game player_id in (undo player_id pm game (py, px));
-  (py, px)::path
 
 let rec printpath = function
   | [] -> ()
   | [(y, x)] -> Printf.printf "(%d, %d)\n%!" x y
   | (y, x)::tl -> (Printf.printf "(%d, %d)--" x y); printpath tl
 
-let pathtoarray path n =
-  let ans = Array.init (2*n-1) (fun y -> Array.init (2*n-1) (fun x -> false)) in
-  let rec fill = function
-    |[] -> ()
-    |[(y, x)] -> (ans.(y).(x) <- true);
-    |(ay, ax)::(by, bx)::c -> (ans.(ay).(ax) <- true); (ans.(by).(bx) <- true);
-                              (ans.((ay+by)/2).((ax+bx)/2) <- true);
-                              fill ((by,bx)::c)
-  in (fill path); ans
+
 
 let printparray patharray =
   Array.iter(fun y ->
     Array.iter(fun x -> Printf.printf "%d " (if x then 1 else 0)
     ) y; print_newline()
   ) patharray
-
-(* Checks whether the move consists of a wall cutting the given path. *)
-let cutspath move patharray =
-  match move with
-  |Move(y, x) -> false
-  |PlaceWall wlist -> let rec checkwalls = function
-                      |[] -> false
-                      |(wy, wx)::wtl -> patharray.(wy).(wx) || checkwalls wtl
-                    in checkwalls wlist
 
 (* Returns a list of movements that achieve the maximal value of minimal value
 the opponent can force the player into, where the value of a position is defined
