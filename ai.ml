@@ -9,20 +9,20 @@ let dist_to_win board player_id =
   Queue.push (iy/2, ix/2) q;
   (dist.(iy/2).(ix/2) <- 0);
   while (not (Queue.is_empty q)) do
-	  let (py, px) = Queue.pop q in
-	  let chk_neighbor (py, px) (qy, qx) =
-		  if qx >= 0 && qy >= 0 && qx <= n - 1 && qy <= n - 1 &&
-  				not ((board.board).(py+qy).(px+qx) = Wall) &&
-  				dist.(qy).(qx) = -1 then begin
-			  Queue.push (qy, qx) q;
+    let (py, px) = Queue.pop q in
+    let chk_neighbor (py, px) (qy, qx) =
+      if qx >= 0 && qy >= 0 && qx <= n - 1 && qy <= n - 1 &&
+          not ((board.board).(py+qy).(px+qx) = Wall) &&
+          dist.(qy).(qx) = -1 then begin
+        Queue.push (qy, qx) q;
         (dist.(qy).(qx) <- dist.(py).(px) + 1);
       end
-	  in List.iter (chk_neighbor (py, px))
+    in List.iter (chk_neighbor (py, px))
     [(py-1, px); (py+1, px); (py, px-1); (py, px+1)]
   done;
   let dto y x = if (dist.(y).(x) >= 0) then dist.(y).(x) else max_int in
   let rec ans a b = if (b = 0) then dto a 0 else min (dto a b) (ans a (b-1)) in
-	if player_id = 0 then ans (n-1) (n-1) else ans 0 (n-1)
+  if player_id = 0 then ans (n-1) (n-1) else ans 0 (n-1)
 
 (* Returns a list of all possible moves that a given player can make. *)
 let get_valid_moves board player_id =
@@ -38,20 +38,20 @@ let get_valid_moves board player_id =
   (* possible wall placements *)
   (* only consider down and right, to avoid considering a pair of walls twice *)
   let rec build_inc_lst n thresh = (* 0, 1, 2, ..., thresh-1 *)
-	if n < thresh then n::(build_inc_lst (n+1) thresh) else [] in
+  if n < thresh then n::(build_inc_lst (n+1) thresh) else [] in
   let all  = build_inc_lst 0 board.size in
   let even = List.map (fun x -> 2 * x)     all in
   let odd  = List.map (fun x -> 2 * x + 1) all in
   let all_full = build_inc_lst 0 (board.size * 2 - 2) in
   let wall_placements =
-	List.flatten (
-	  List.map (fun x ->
-		if x mod 2 = 1 then
-		  List.map (fun y -> PlaceWall [(y,x); (y+1,x); (y+2,x)]) even
-		else
-		  List.map (fun y -> PlaceWall [(y,x); (y,x+1); (y,x+2)]) odd
-	  ) all_full
-	) in
+  List.flatten (
+    List.map (fun x ->
+    if x mod 2 = 1 then
+      List.map (fun y -> PlaceWall [(y,x); (y+1,x); (y+2,x)]) even
+    else
+      List.map (fun y -> PlaceWall [(y,x); (y,x+1); (y,x+2)]) odd
+    ) all_full
+  ) in
 
   (* Filter out invalid moves *)
   List.filter
@@ -122,6 +122,7 @@ let ismove = function
 let minimax game player_id =
   let op_id = 1 - player_id in
   let pml = get_valid_moves game player_id in
+  let oml = get_valid_moves game op_id in
   if List.length pml = 0 then Printf.printf "Oopsy daisy!\n%!";
   let (odist, pdist) = (dist_to_win game op_id, dist_to_win game player_id) in
   (Printf.printf "now pdist = %d, odist = %d\n%!" pdist odist);
@@ -129,23 +130,32 @@ let minimax game player_id =
   let opath = pathtoarray (path_to_win game op_id) game.size in
   let (ploc, oloc) = (fst game.players.(player_id), fst game.players.(op_id)) in
   let counter = ref 0 in
-	let rec best game = function
-	  |[] -> (-max_int, [])
-	  |pm::ptl -> (commit_move player_id pm game);
-				  let oml = get_valid_moves game op_id in
-				  let rec worse b = function
-					|[] -> max_int
-					|om::otl -> (commit_move op_id om b);
+  let rec best game = function
+    |[] -> (-max_int, [])
+    |pm::ptl -> (commit_move player_id pm game);
+          let noml = match pm with
+            |Move(y, x) -> get_valid_moves game op_id
+            |PlaceWall wlist -> List.filter
+                                (fun mv -> match mv with
+                                          |Move(yy, xx) -> true
+                                          |PlaceWall prevwlist ->
+                                          not (List.exists
+                                          (fun w -> (List.mem w prevwlist))
+                                          wlist))
+                                oml
+          in let rec worse b = function
+          |[] -> max_int
+          |om::otl -> (commit_move op_id om b);
             let x = if (cutspath om ppath) || (cutspath pm ppath) || ismove pm
                     then ((incr counter); dist_to_win b player_id) else pdist in
             let y = if (cutspath om opath) || (cutspath pm opath) || ismove om
                     then ((incr counter); dist_to_win b op_id) else odist in
             let a = if (y <= 8) then y*(16-y) else 4*y + 32 in
             let d = a - 8*x in (undo op_id om b oloc); min d (worse b otl)
-				  in let w = worse game oml in (undo player_id pm game ploc);
-				  let (prevbest, bestmoves) = best game ptl in
-				  if (w = prevbest) then (w, pm::bestmoves) else
-				  if (w > prevbest) then (w, [pm]) else (prevbest, bestmoves)
+          in let w = worse game noml in (undo player_id pm game ploc);
+          let (prevbest, bestmoves) = best game ptl in
+          if (w = prevbest) then (w, pm::bestmoves) else
+          if (w > prevbest) then (w, [pm]) else (prevbest, bestmoves)
   in let ans = snd (best game pml) in
   (Printf.printf "Called dist_to_win %d times!\n%!" !counter); ans
 
