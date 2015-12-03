@@ -122,7 +122,6 @@ let ismove = function
 let minimax game player_id =
   let op_id = 1 - player_id in
   let pml = get_valid_moves game player_id in
-  let oml = get_valid_moves game op_id in
   if List.length pml = 0 then Printf.printf "Oopsy daisy!\n%!";
   let (odist, pdist) = (dist_to_win game op_id, dist_to_win game player_id) in
   (Printf.printf "now pdist = %d, odist = %d\n%!" pdist odist);
@@ -133,17 +132,8 @@ let minimax game player_id =
   let rec best game = function
     |[] -> (-max_int, [])
     |pm::ptl -> (commit_move player_id pm game);
-          let noml = match pm with
-            |Move(y, x) -> get_valid_moves game op_id
-            |PlaceWall wlist -> List.filter
-                                (fun mv -> match mv with
-                                          |Move(yy, xx) -> true
-                                          |PlaceWall prevwlist ->
-                                          not (List.exists
-                                          (fun w -> (List.mem w prevwlist))
-                                          wlist))
-                                oml
-          in let rec worse b = function
+          let oml = get_valid_moves game op_id in
+          let rec worse b = function
           |[] -> max_int
           |om::otl -> (commit_move op_id om b);
             let x = if (cutspath om ppath) || (cutspath pm ppath) || ismove pm
@@ -152,7 +142,7 @@ let minimax game player_id =
                     then ((incr counter); dist_to_win b op_id) else odist in
             let a = if (y <= 8) then y*(16-y) else 4*y + 32 in
             let d = a - 8*x in (undo op_id om b oloc); min d (worse b otl)
-          in let w = worse game noml in (undo player_id pm game ploc);
+          in let w = worse game oml in (undo player_id pm game ploc);
           let (prevbest, bestmoves) = best game ptl in
           if (w = prevbest) then (w, pm::bestmoves) else
           if (w > prevbest) then (w, [pm]) else (prevbest, bestmoves)
