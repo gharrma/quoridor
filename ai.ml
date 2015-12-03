@@ -1,11 +1,18 @@
 open Model
 
+let print_game t =
+  Array.iter (fun row ->
+    Array.iter (function
+      | NoWall    -> print_string ". "
+      | Wall      -> print_string "+ "
+      | Space     -> print_string "  "
+      | Player id -> print_int id; print_char ' '
+    ) row; print_newline()
+  ) t.board
+
 (* Returns the number of moves required to win for a given player. *)
 let dist_to_win board player_id =
   let ((iy, ix), _) = (board.players).(player_id) in
-  (match board.board.(iy).(ix) with
-  |Player player_id -> ()
-  |_ -> (Printf.printf "ADASDASDASDADASDSADASDA\n%!"));
   let q = Queue.create() in
   let n = board.size in
   let dist = Array.init n (fun x -> Array.init n (fun x -> -1)) in
@@ -25,17 +32,8 @@ let dist_to_win board player_id =
   done;
   let dto y x = if (dist.(y).(x) >= 0) then dist.(y).(x) else max_int in
   let rec ans a b = if (b = 0) then dto a 0 else min (dto a b) (ans a (b-1)) in
-  if player_id = 0 then ans (n-1) (n-1) else ans 0 (n-1)
-
-let print_game t =
-  Array.iter (fun row ->
-    Array.iter (function
-      | NoWall    -> print_string ". "
-      | Wall      -> print_string "+ "
-      | Space     -> print_string "  "
-      | Player id -> print_int id; print_char ' '
-    ) row; print_newline()
-  ) t.board
+  let dwin = if player_id = 0 then ans (n-1) (n-1) else ans 0 (n-1) in
+  if (dwin > 1000) then ((print_game board); (Printf.printf "(%d, %d)\n%!" iy ix); dwin) else dwin
 
 (* Returns list consisting of a possible path to victory (no jumping),
   where the head is the current position of the player
@@ -54,7 +52,6 @@ let rec path_to_win game player_id =
     |(dy, dx)::ptl -> let m = Move(py+dy, px+dx) in
                       (commit_move player_id m game);
                       let d = dist_to_win game player_id in
-                      if (d > 1000) then (print_game game);
                       (undo player_id m game (py, px));
                       (game.board.(oy).(ox) <- Player op_id);
                       let (pm, dis) = closest ptl in if (d < dis) then (m, d)
@@ -125,6 +122,7 @@ let get_valid_moves board player_id =
 
   (* Filter out invalid moves *)
   let parray = pathtoarray (path_to_win board player_id) board.size in
+  let oarray = pathtoarray (path_to_win board (1 - player_id)) board.size in
 
   List.filter
   (fun m -> match m with
@@ -135,7 +133,7 @@ let get_valid_moves board player_id =
                 |[] -> true
                 |(y, x)::tl -> not (haswall board y x) && canplace tl in
               if (not (canplace wlist)) then false else
-              if (cutspath m parray) then
+              if (cutspath m parray) || (cutspath m oarray) then
               validate_move player_id m board else true
             end)
   (moves @ wall_placements)
