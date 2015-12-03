@@ -191,6 +191,7 @@ let minimax game player_id =
   (Printf.printf "Called dist_to_win %d times!\n%!" !counter); ans
 
 let next_move game player_id =
+  let t = Sys.time() in let ans =
   let (ploc, nwalls) = game.players.(player_id) in
   let moves = if (nwalls = 0) then
   let pml = get_valid_moves game player_id in
@@ -208,3 +209,4 @@ let next_move game player_id =
   match mv with
     |Move(x, y) -> (Printf.printf "let's move  to (%d,%d)\n%!" x y); mv
     |_ -> (); mv
+  in (Printf.printf "Thinking time: %fs\n%!" (Sys.time() -. t)); ans
