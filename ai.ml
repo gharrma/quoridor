@@ -151,13 +151,17 @@ let ismove = function
   |_ -> false
 
 let heuristic game player_id =
+  let pdist  = dist_to_win game player_id in
+  let pwalls = snd game.players.(player_id) in
   let odist = dist_to_win game (1 - player_id) in
-  let pdist = dist_to_win game player_id in
-  ((100 - pdist) * (100 - pdist)) - ((100 - odist) * (100 - odist))
+  let owalls = snd game.players.(1 - player_id) in
+  let square n = n * n in
+  (square (100 - pdist)) + pwalls - (square (100 - odist)) - owalls
 
 (* https://en.wikipedia.org/wiki/Alpha–beta_pruning *)
 let minimax game player_id =
-  let prev_loc = fst game.players.(player_id) in
+  let pprev_loc = fst game.players.(player_id) in
+  let oprev_loc = fst game.players.(1 - player_id) in
   let rec alphabeta game depth alpha beta maximizing = (* returns (score, move) *)
     if depth = 0 then
       (heuristic game player_id, None)
@@ -169,7 +173,7 @@ let minimax game player_id =
         else
           let () = commit_move player_id move game in
           let (score,_) = alphabeta game (depth - 1) alpha beta (not maximizing) in
-          let () = undo player_id move game prev_loc in
+          let () = undo player_id move game pprev_loc in
           let (best, best_moves) =
             if score = best then (score, move::best_moves)
             else if score > best then (score, [move])
@@ -181,14 +185,14 @@ let minimax game player_id =
       let (best, best_moves, _) = List.fold_left find_best start_acc moves in
       (best, Some best_moves)
     else (* maximizing = false *)
-      let moves = get_valid_moves game player_id in
+      let moves = get_valid_moves game (1 - player_id) in
       let find_best (best, best_moves, beta) move =
         if beta <= alpha then
           (best, best_moves, beta)
         else
-          let () = commit_move player_id move game in
+          let () = commit_move (1 - player_id) move game in
           let (score,_) = alphabeta game (depth - 1) alpha beta (not maximizing) in
-          let () = undo player_id move game prev_loc in
+          let () = undo (1 - player_id) move game oprev_loc in
           let (best, best_moves) =
             if score = best then (score, move::best_moves)
             else if score < best then (score, [move])
