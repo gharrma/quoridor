@@ -151,7 +151,10 @@ let ismove = function
   |_ -> false
 
 let heuristic game player_id =
-  (dist_to_win game (1 - player_id)) - (dist_to_win game player_id)
+  let odist = dist_to_win game (1 - player_id) in
+  let pdist = dist_to_win game player_id in
+  Printf.printf "%d %d\n%!" pdist odist;
+  -((100 - odist) * (100 - odist)) + ((100 - pdist) * (100 - pdist))
 
 (* https://en.wikipedia.org/wiki/Alpha–beta_pruning *)
 let minimax game player_id =
