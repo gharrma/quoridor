@@ -150,6 +150,61 @@ let ismove = function
   |Move(x, y) -> true
   |_ -> false
 
+let heuristic game player_id =
+  (dist_to_win game (1 - player_id)) - (dist_to_win game player_id)
+
+(* https://en.wikipedia.org/wiki/Alpha–beta_pruning *)
+let minimax game player_id =
+  let prev_loc = fst game.players.(player_id) in
+  let rec alphabeta game depth alpha beta maximizing = (* returns (score, move) *)
+    if depth = 0 then
+      (heuristic game player_id, None)
+    else if maximizing = true then
+      let moves = get_valid_moves game player_id in
+      let find_best (best, best_moves, alpha) move =
+        if beta <= alpha then
+          (Printf.printf "Pruned! %d\n%!" depth;
+          (best, best_moves, alpha))
+        else
+          let () = commit_move player_id move game in
+          let (score,_) = alphabeta game (depth - 1) alpha beta (not maximizing) in
+          let () = undo player_id move game prev_loc in
+          let (best, best_moves) =
+            if score = best then (score, move::best_moves)
+            else if score > best then (score, [move])
+            else (best, best_moves) in
+          let alpha = max alpha best in
+          (best, best_moves, alpha)
+      in
+      let start_acc = (min_int, [], min_int) in
+      let (best, best_moves, _) = List.fold_left find_best start_acc moves in
+      (best, Some best_moves)
+    else (* maximizing = false *)
+      let moves = get_valid_moves game player_id in
+      let find_best (best, best_moves, beta) move =
+        if beta <= alpha then
+          (Printf.printf "Pruned! %d\n%!" depth;
+          (best, best_moves, beta))
+        else
+          let () = commit_move player_id move game in
+          let (score,_) = alphabeta game (depth - 1) alpha beta (not maximizing) in
+          let () = undo player_id move game prev_loc in
+          let (best, best_moves) =
+            if score = best then (score, move::best_moves)
+            else if score < best then (score, [move])
+            else (best, best_moves) in
+          let beta = min beta best in
+          (best, best_moves, beta)
+      in
+      let start_acc = (max_int, [], max_int) in
+      let (best, best_moves, _) = List.fold_left find_best start_acc moves in
+      (best, Some best_moves)
+  in
+  match alphabeta game 2 min_int max_int true with
+  | (_,Some best_moves) -> best_moves
+  | _ -> failwith "impossible"
+
+(*
 let minimax game player_id =
   let op_id = 1 - player_id in
   let pml = get_valid_moves game player_id in
@@ -184,6 +239,7 @@ let minimax game player_id =
           if (w > prevbest) then (w, [pm]) else (prevbest, bestmoves)
   in let ans = snd (best game pml) in
   (Printf.printf "Called dist_to_win %d times!\n%!" !counter); ans
+*)
 
 let next_move game player_id =
   let t = Sys.time() in let ans =
