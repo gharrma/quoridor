@@ -81,16 +81,6 @@ let cutspath move patharray =
                       |(wy, wx)::wtl -> patharray.(wy).(wx) || checkwalls wtl
                     in checkwalls wlist
 
-(* Returns whether a location is unacessible, either because it has a wall,
- is not a valid board location or is occupied by a player. *)
-let haswall board y x =
-  let n = Array.length board.board in
-  if(y < 0 || y >= n || x < 0 || x >= n) then true else
-  match (board.board).(y).(x) with
-  |Wall -> true
-  |Player i -> true
-  |_ -> false
-
 (* Returns a list of all possible moves that a given player can make. *)
 let get_valid_moves board player_id =
   let ((py, px), nwalls) = (board.players).(player_id) in
