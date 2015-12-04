@@ -163,8 +163,7 @@ let minimax game player_id =
       let moves = get_valid_moves game player_id in
       let find_best (best, best_moves, alpha) move =
         if beta <= alpha then
-          (Printf.printf "Pruned! %d\n%!" depth;
-          (best, best_moves, alpha))
+          (best, best_moves, alpha)
         else
           let () = commit_move player_id move game in
           let (score,_) = alphabeta game (depth - 1) alpha beta (not maximizing) in
@@ -183,8 +182,7 @@ let minimax game player_id =
       let moves = get_valid_moves game player_id in
       let find_best (best, best_moves, beta) move =
         if beta <= alpha then
-          (Printf.printf "Pruned! %d\n%!" depth;
-          (best, best_moves, beta))
+          (best, best_moves, beta)
         else
           let () = commit_move player_id move game in
           let (score,_) = alphabeta game (depth - 1) alpha beta (not maximizing) in
