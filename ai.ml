@@ -106,7 +106,7 @@ let get_valid_moves board player_id =
   (* only consider down and right, to avoid considering a pair of walls twice *)
   let rec build_inc_lst n thresh = (* 0, 1, 2, ..., thresh-1 *)
   if n < thresh then n::(build_inc_lst (n+1) thresh) else [] in
-  let all  = build_inc_lst 0 board.size in
+  let all = build_inc_lst 0 (board.size - 1) in
   let even = List.map (fun x -> 2 * x)     all in
   let odd  = List.map (fun x -> 2 * x + 1) all in
   let all_full = build_inc_lst 0 (board.size * 2 - 2) in
@@ -131,7 +131,7 @@ let get_valid_moves board player_id =
               if (nwalls = 0) then false else
               let rec canplace = function
                 |[] -> true
-                |(y, x)::tl -> not (haswall board y x) && canplace tl in
+                |(y, x)::tl -> board.board.(y).(x) <> Wall && canplace tl in
               if (not (canplace wlist)) then false else
               if (cutspath m parray) || (cutspath m oarray) then
               validate_move player_id m board else true
@@ -173,7 +173,9 @@ let minimax game player_id =
   let rec best game = function
     |[] -> (-max_int, [])
     |pm::ptl -> (commit_move player_id pm game);
+          (* let t = Sys.time() in *)
           let oml = get_valid_moves game op_id in
+          (* (Printf.printf "get_valid_moves took %fs seconds\n%!" (Sys.time() -. t)); *)
           let rec worse b = function
           |[] -> max_int
           |om::otl -> (commit_move op_id om b);
@@ -182,8 +184,11 @@ let minimax game player_id =
             let y = if (cutspath om opath) || (cutspath pm opath) || ismove om
                     then ((incr counter); dist_to_win b op_id) else odist in
             let a = if (y <= 8) then y*(16-y) else 4*y + 32 in
-            let d = a - 8*x in (undo op_id om b oloc); min d (worse b otl)
-          in let w = worse game oml in (undo player_id pm game ploc);
+            let d = a - 8*x in (undo op_id om b oloc); min d (worse b otl) in
+          (* let t = Sys.time() in *)
+          let w = worse game oml in
+          (* (Printf.printf "worse game took %fs seconds\n%!" (Sys.time() -. t)); *)
+          (undo player_id pm game ploc);
           let (prevbest, bestmoves) = best game ptl in
           if (w = prevbest) then (w, pm::bestmoves) else
           if (w > prevbest) then (w, [pm]) else (prevbest, bestmoves)

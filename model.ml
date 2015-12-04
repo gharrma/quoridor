@@ -107,25 +107,24 @@ let validate_move player_id move board =
     |(y, x)::tl -> not (haswall board y x) && canplace tl in
     if (not (canplace wlist)) then false else
     let n = board.size in
-    let mark = ref (Array.init n (fun x -> Array.init n (fun x -> false))) in
-    let top = ref false in let bot = ref false in
-    let dirs = [|(0, 2);(2, 0);(-2, 0);(0,-2)|] in
-    let rec visit mark top bot (y, x) =
-      if (x < 0 || y < 0 || x >= 2*n || y >= 2*n || !mark.(y/2).(x/2))
-       then ()
-      else begin !mark.(y/2).(x/2) <- true;
-      (if (y = 0) then top := true else
-       if (y = 2*n - 2) then bot := true else ());
+    let mark = Array.init n (fun x -> Array.init n (fun x -> false)) in
+    let found = ref false in
+    let dirs = [|(-2, 0);(2, 0);(0, -2);(0, 2)|] in
+    let rec visit mark found player_id (y, x) =
+      if (x < 0 || y < 0 || x >= 2*n || y >= 2*n || mark.(y/2).(x/2))
+        then ()
+      else begin mark.(y/2).(x/2) <- true;
+      if (player_id = 0 && y = 2*n - 2) then found := true else
+      if (player_id = 1 && y = 0) then found := true else
       for i = 0 to 3 do let (dy, dx) = dirs.(i) in
-       if(not (haswall board (y + dy/2) (x + dx/2) ||
-       List.mem (y + dy/2, x + dx/2) wlist))
-       then visit mark top bot (y + dy, x + dx) else () done end
-    in (visit mark top bot (fst board.players.(0)));
-    let ans0 = !bot in
-    let mark = ref (Array.init n (fun x -> Array.init n (fun x -> false))) in
-    let top = ref false in
-    (visit mark top bot (fst board.players.(1)));
-    ans0 && !top
+        if(not (haswall board (y + dy/2) (x + dx/2) ||
+        List.mem (y + dy/2, x + dx/2) wlist))
+        then visit mark found player_id (y + dy, x + dx) else () done end
+    in (visit mark found 0 (fst board.players.(0)));
+    let ans0 = !found in (found := false);
+    (Array.iter (fun row -> Array.fill row 0 n false) mark);
+    (visit mark found 1 (fst board.players.(1)));
+    ans0 && !found
     end
 
 let commit_move player_id move board =
