@@ -289,7 +289,8 @@ and checkWin players =
 (* Event handler for the win screen, directs to either
    player customization screen or closes game *)
 and waitWin () =
-  let event = wait_next_event [Poll] in
+  let event = try wait_next_event [Poll] with
+                Graphic_failure _ -> (close_graph graph; exit 0) in
   if (event.button && not(!button)) then
     let posx = event.mouse_x in
     let posy = event.mouse_y in
@@ -318,7 +319,8 @@ and loop (players:player list) (cur_player:int) =
   let win = checkWin players in (* Check if someone has won *)
   (if (fst win) then drawWin (snd win) else ()); (*If win, then do win actions*)
   if (List.nth players cur_player).cont = Human then (* Check if human or ai *)
-   let event = wait_next_event [Button_down; Key_pressed; Mouse_motion] in
+    let event = try wait_next_event [Poll] with
+                Graphic_failure _ -> (close_graph graph; exit 0)in
     let new_player =
       if (event.key = '\027') then (close_graph graph; exit 0)
       else if event.button && not(!button) then (* Check for button press *)
@@ -428,7 +430,8 @@ and players (c1:controller) (c2:controller) (c:color) (c':color) =
 
 (* Event handler for instructions menu *)
 and howToPlayLoop () =
-  let event = wait_next_event [Button_down; Key_pressed; Mouse_motion] in
+  let event = try wait_next_event [Poll] with
+                Graphic_failure _ -> (close_graph graph; exit 0) in
   if (event.key = '\027') then ignore(close_graph graph; exit 0)  else
   if (event.button && not(!button)) then
     let posx = event.mouse_x in
@@ -450,7 +453,8 @@ and howToPlayLoopInit () =
 
 (* Event handler for the main menu *)
 and menuLoop () =
-  let event = wait_next_event [Button_down; Key_pressed; Mouse_motion] in
+  let event = try wait_next_event [Poll] with
+                Graphic_failure _ -> (close_graph graph; exit 0) in
   if (event.key = '\027') then ignore(close_graph graph; exit 0)  else
   if (event.button && not(!button)) then
     let posx = event.mouse_x in
@@ -483,7 +487,8 @@ and playerInit () =
 and playerLoop
       (c1:controller) (c2:controller) (c:color) (c':color) (cw:bool) (id:int) =
   drawPlayer c1 c2 c c' cw;
-  let event = wait_next_event [Button_down; Key_pressed; Mouse_motion] in
+  let event = try wait_next_event [Poll] with
+                Graphic_failure _ -> (close_graph graph; exit 0) in
   if (event.key = '\027') then ignore(close_graph graph; exit 0)  else
   if cw then (* Check if color wheel open *)
     if (event.button && not(!button)) then
@@ -509,7 +514,7 @@ and playerLoop
         players c1 c2 c c' (* Play game *)
       else
        playerLoop c1 c2 c c' cw id
-    else if (posy >= 710 && posy <= 775 && posx >= 358 && posx <= 490) then
+    else if (posy >= 710 && posy <= 775 && posx >= 358 && posx <= 590) then
       playerLoop Human c2 c c' cw id (* Set c1 to Human *)
     else if (posy >= 692 && posy <= 772 && posx >= 694 && posx <= 782) then
       playerLoop Ai c2 c c' cw id (* Set c1 to AI *)
