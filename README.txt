@@ -5,3 +5,5 @@ Important: the program has a window size of 880x920, so the game is difficult to
 play and appreciate on a screen smaller than that.
 
 Good luck against the AI!
+
+Use mouse for both navigation in menus and during play.
