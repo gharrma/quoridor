@@ -81,6 +81,20 @@ let cutspath move patharray =
                       |(wy, wx)::wtl -> patharray.(wy).(wx) || checkwalls wtl
                     in checkwalls wlist
 
+let dist_given_path game player_id prev_dist prev_pos path =
+  if fst game.players.(player_id) <> prev_pos then
+   dist_to_win game player_id
+  else let rec intersect = function
+  | [] -> 0
+  | [pos] -> prev_dist
+  | (ay, ax)::(by, bx)::c -> if game.board.((ay+by)/2).((ax+bx)/2) = Wall then
+                              dist_to_win game player_id
+                             else intersect ((by, bx)::c)
+  in intersect path
+
+
+
+
 (* Returns a list of all possible moves that a given player can make. *)
 let get_valid_moves board player_id =
   let ((py, px), nwalls) = (board.players).(player_id) in
@@ -150,21 +164,26 @@ let ismove = function
   |Move(x, y) -> true
   |_ -> false
 
-let heuristic game player_id =
-  let pdist  = dist_to_win game player_id in
+let heuristic game player_id pd od ppos opos ppath opath =
+  let pdist  = dist_given_path game player_id pd ppos ppath in
   let pwalls = snd game.players.(player_id) in
-  let odist = dist_to_win game (1 - player_id) in
+  let odist = dist_given_path game (1 - player_id) od opos opath in
   let owalls = snd game.players.(1 - player_id) in
   let square n = n * n in
-  (square (100 - pdist)) + pwalls - (square (100 - odist)) - owalls
+  square (100 - pdist) - square (10 - pwalls)
+  - (square (100 - odist) + square (10 - owalls))
 
 (* https://en.wikipedia.org/wiki/Alpha–beta_pruning *)
 let minimax game player_id =
   let pprev_loc = fst game.players.(player_id) in
   let oprev_loc = fst game.players.(1 - player_id) in
+  let ppath = path_to_win game player_id in
+  let opath = path_to_win game (1 - player_id) in
+  let pdist = List.length ppath - 1 in
+  let odist = List.length opath - 1 in
   let rec alphabeta game depth alpha beta maximizing = (* returns (score, move) *)
     if depth = 0 then
-      (heuristic game player_id, None)
+      (heuristic game player_id pdist odist pprev_loc oprev_loc ppath opath, None)
     else if maximizing = true then
       let moves = get_valid_moves game player_id in
       let find_best (best, best_moves, alpha) move =
