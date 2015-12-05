@@ -46,9 +46,6 @@ type move =
 (** Create empty board state that is n * n in size (Square board) *)
 val create_board : int -> t
 
-(** Create a board from a JSON game save. *)
-val board_from_file : string -> t
-
 (** [validate_move player_id move board] validates a movement or wall placement
     by a player, returning whether the move is allowed. *)
 val validate_move : id -> move -> t -> bool

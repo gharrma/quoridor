@@ -162,6 +162,3 @@ let validate_move player_id move board =
     (undo player_id move board (py, px));
     ans0 && !found
     end end
-
-let board_from_file s =
-  failwith "TODO"
