@@ -170,14 +170,15 @@ let heuristic game player_id pd od ppos opos ppath opath =
   let odist = dist_given_path game (1 - player_id) od opos opath in
   let owalls = snd game.players.(1 - player_id) in
   let square n = n * n in
-  (square (100 - pdist)) + pwalls - (square (100 - odist)) - owalls
+  square (100 - pdist) - square (10 - pwalls)
+  - (square (100 - odist) + square (10 - owalls))
 
 (* https://en.wikipedia.org/wiki/Alpha–beta_pruning *)
 let minimax game player_id =
   let pprev_loc = fst game.players.(player_id) in
   let oprev_loc = fst game.players.(1 - player_id) in
   let ppath = path_to_win game player_id in
-  let opath = path_to_win game player_id in
+  let opath = path_to_win game (1 - player_id) in
   let pdist = List.length ppath - 1 in
   let odist = List.length opath - 1 in
   let rec alphabeta game depth alpha beta maximizing = (* returns (score, move) *)
@@ -222,7 +223,7 @@ let minimax game player_id =
       let (best, best_moves, _) = List.fold_left find_best start_acc moves in
       (best, Some best_moves)
   in
-  match alphabeta game 3 min_int max_int true with
+  match alphabeta game 2 min_int max_int true with
   | (_,Some best_moves) -> best_moves
   | _ -> failwith "impossible"
 
