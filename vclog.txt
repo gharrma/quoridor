@@ -1,0 +1,618 @@
+commit 147e190128e369f03f1a12ee2c5312e896639c84
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Sat Dec 5 17:05:10 2015 -0500
+
+    Stylize ai
+
+commit cf2c6dfbdce9257a146bd6a381fcfaa8e6ee1d7c
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Sat Dec 5 16:02:11 2015 -0500
+
+    Caught closing exceptions, view done
+
+commit f74ad83b00334564c20b1fe71420bfefd819bdb2
+Author: TylerT <tt395@cornell.edu>
+Date:   Sat Dec 5 15:45:22 2015 -0500
+
+    Update README.txt
+
+commit 29735f5796aa27e9d61bfe98d3810b6ff397c961
+Merge: 20646d2 1ade4d9
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Sat Dec 5 15:43:57 2015 -0500
+
+    Merge
+
+commit 20646d22238c4f8c4e3f25b9eb04f7f02f4d5f08
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Sat Dec 5 15:42:37 2015 -0500
+
+    Style/comment view.ml and fixed graphicsRipper to match design specs *)
+
+commit 1ade4d90e2d9e87629fad9d211810290780fc404
+Merge: 8d76baa 701dcab
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Sat Dec 5 15:17:28 2015 -0500
+
+    Merge branch 'alphabeta'
+
+commit 8d76baa9f28d7768fb08dee5a63cf56fe6f2b9ba
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Fri Dec 4 23:56:49 2015 -0500
+
+    Add final design document
+
+commit a0794d7eb0ce5cb1ac0c7d26590c9fd1118bbe1a
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Fri Dec 4 22:38:00 2015 -0500
+
+    Stylize model.ml
+
+commit 701dcab975c8d91c971654bb462790c2c5bc97ef
+Author: victoreis <vor3@cornell.edu>
+Date:   Fri Dec 4 22:14:04 2015 -0500
+
+    slightly different heuristics
+
+commit ffade7066f2bee68d02bf74d2777a8f07b5eaebd
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Fri Dec 4 19:45:50 2015 -0500
+
+    Remove game saving functions
+
+commit 65420eefe336d951b8631bea52f7c537ded30496
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Fri Dec 4 19:27:45 2015 -0500
+
+    Add README.txt
+
+commit 227eb63a4863a3b5b35929e2c45ba3d17a9f3bdf
+Author: victoreis <vor3@cornell.edu>
+Date:   Fri Dec 4 18:14:33 2015 -0500
+
+    dist_given_path
+
+commit 238abc070b413ba2f22889884d75f795d51a8f9e
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Fri Dec 4 15:50:20 2015 -0500
+
+    Fix bugs in alphabeta; use wall count as heuristic tie breaker
+
+commit 68ddbd6ac6df8c48c3cfdcf5a017118e5dbf694b
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Fri Dec 4 14:34:41 2015 -0500
+
+    Remove print statement
+
+commit db8cf8871a29e1d4ed28239abc6e7e23457f7752
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Fri Dec 4 14:30:15 2015 -0500
+
+    Improve alphabeta heuristic
+
+commit 303c653ea5568c898ad595ecdca449139d2f1f32
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Fri Dec 4 00:01:36 2015 -0500
+
+    Remove print statements
+
+commit a8ffc96c5dc0520d67e64c6f21ff877b5a366550
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Thu Dec 3 23:29:54 2015 -0500
+
+    Implement alpha-beta
+
+commit 7806f28c4fc58ba5b88fd5b04811fb6d839d90c4
+Author: victoreis <vor3@cornell.edu>
+Date:   Thu Dec 3 20:29:32 2015 -0500
+
+    300 ms off
+
+commit 06aa4818e891db86440e682fcd933c41fb97806a
+Author: victoreis <vor3@cornell.edu>
+Date:   Thu Dec 3 19:54:50 2015 -0500
+
+    cleaned up DFS
+
+commit 34c6ea5aa9f61f24644acf01c3b46cbb6821e39e
+Author: victoreis <vor3@cornell.edu>
+Date:   Thu Dec 3 13:41:13 2015 -0500
+
+    Thinking time display
+
+commit 38ca0d52d70f8953fcf8919b1291a2ba957b47b6
+Author: victoreis <vor3@cornell.edu>
+Date:   Thu Dec 3 13:38:42 2015 -0500
+
+    Fixed stack overflow bug
+
+commit fefb9d9d05e837c38e68a9262234343d55afc6ec
+Author: victoreis <vor3@cornell.edu>
+Date:   Thu Dec 3 11:28:27 2015 -0500
+
+    faster validation
+
+commit 011579aed08d63e05cb019baf9edc89d0c1e4d7d
+Author: victoreis <vor3@cornell.edu>
+Date:   Thu Dec 3 00:27:45 2015 -0500
+
+    Changed move validation
+
+commit d18f277b66f6a4d99d977318dde3606aa52a1eab
+Author: victoreis <vor3@cornell.edu>
+Date:   Thu Dec 3 00:22:58 2015 -0500
+
+    Changed move validation
+
+commit cd52b2b2635da8e86f743a9d1f28772d80216396
+Author: victoreis <vor3@cornell.edu>
+Date:   Wed Dec 2 23:08:05 2015 -0500
+
+    added path cutting
+
+commit 3e7b5b6338586a6261d3a0600e9a7d42fc6e9eeb
+Author: victoreis <vor3@cornell.edu>
+Date:   Wed Dec 2 18:07:09 2015 -0500
+
+    replaced list by rec
+
+commit f2b8e1d51c4adfaa198d083e7a6a077ea3664faf
+Author: victoreis <vor3@cornell.edu>
+Date:   Wed Dec 2 17:48:25 2015 -0500
+
+    changed hashtbl to array
+
+commit cdbb2ec37ec4d9464e7879e8991d37e0f026285b
+Author: victoreis <vor3@cornell.edu>
+Date:   Wed Dec 2 17:06:18 2015 -0500
+
+    somehow still had physical equality
+
+commit 7a03d75034a4f691fc269b4bdb68000168817568
+Author: victoreis <vor3@cornell.edu>
+Date:   Wed Dec 2 17:04:53 2015 -0500
+
+    removed copy, added undo, added heuristic for no more walls
+
+commit 2c1f27da3c0a73d9fb9afc67fda837781a1d5791
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Wed Dec 2 14:57:09 2015 -0500
+
+    Added randomization for who starts first
+
+commit d42a606bfc949d4d9b90c7391b7fa338fd29a532
+Merge: 524a67f c6fa903
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Wed Dec 2 14:38:50 2015 -0500
+
+    merge
+
+commit 524a67f8e0bb338625d901e9ba9bdce47ecd405e
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Wed Dec 2 14:36:35 2015 -0500
+
+    Extended ai to be able to place walls in last 6 columns
+
+commit c6fa903635b1fc9222bf57224116f531d232bdad
+Author: victoreis <vor3@cornell.edu>
+Date:   Wed Dec 2 12:39:15 2015 -0500
+
+    troll function
+
+commit 43169b94032fef9cf23373d357d08c1e501708a4
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Wed Dec 2 02:34:58 2015 -0500
+
+    AI WORKS!
+
+commit 79dc28cbf9b12de80b32081e1341e68bd6b5be1c
+Author: Sattvik Kansal <sk2278@cornell.edu>
+Date:   Wed Dec 2 01:50:28 2015 -0500
+
+    dist_to_win change to use hastable
+
+commit 5af1daf4218187c55e9a226eb4819ffdfc87b7b4
+Author: Sattvik Kansal <sk2278@cornell.edu>
+Date:   Wed Dec 2 01:41:23 2015 -0500
+
+    h
+
+commit 56a49dbe76de4d246edd664d739fa5dcf61c9427
+Author: Sattvik Kansal <sk2278@cornell.edu>
+Date:   Wed Dec 2 01:25:47 2015 -0500
+
+    dist_to_win fix
+
+commit 2ba4f92d0ee046ea71e31eb9e7742cc0e1390734
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Wed Dec 2 01:10:52 2015 -0500
+
+    Fix AI wall placement bug
+
+commit 8ea023d32029fd62cd81b7f73e70ac77e7aa1f22
+Author: victoreis <vor3@cornell.edu>
+Date:   Wed Dec 2 01:08:43 2015 -0500
+
+    fixed copy
+
+commit 2d6efab40c4374fa7036409d9e3ce017ad02a98d
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Wed Dec 2 00:58:53 2015 -0500
+
+    Remove physical equality
+
+commit 30000912d0b4dcf24629b5943333b3f810ce7e67
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Wed Dec 2 00:51:23 2015 -0500
+
+    Fix a similar bug in chk_neighbor
+
+commit 275a929529058de9fdc16c5348bac1f46c3a64dc
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Wed Dec 2 00:49:28 2015 -0500
+
+    Fix bug in chk_neighbor
+
+commit e3cbca7685e0fd4631dced33c705425251a7e20c
+Merge: 796ca37 e59e33b
+Author: Sattvik Kansal <sk2278@cornell.edu>
+Date:   Wed Dec 2 00:30:15 2015 -0500
+
+    hmm
+
+commit 796ca37cdfc6d133eb7853af86db62bcb040a5d3
+Author: Sattvik Kansal <sk2278@cornell.edu>
+Date:   Wed Dec 2 00:29:17 2015 -0500
+
+    dist_to_win fix
+
+commit e59e33bcb50d5fa53998ff62a3776805af47eee9
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Wed Dec 2 00:24:03 2015 -0500
+
+    style
+
+commit aefa4c7ca1e8959337c5f5a71b056a9f149ae17a
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Wed Dec 2 00:23:10 2015 -0500
+
+    style
+
+commit bdb3ddf461e233bce7d77f8428e83796cea8ade3
+Author: Sattvik Kansal <sk2278@cornell.edu>
+Date:   Wed Dec 2 00:21:34 2015 -0500
+
+    dist_to_win bug fix hastable
+
+commit 80f70834e12d44e913175783c44aa549b474fe97
+Author: victoreis <vor3@cornell.edu>
+Date:   Wed Dec 2 00:14:30 2015 -0500
+
+    fixed copy size
+
+commit 4717fc4ec6736de5fa206e85dc26a19b9448ea40
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Wed Dec 2 00:08:09 2015 -0500
+
+    Fix crazy compilation errors by making view call Ai.next_move directly :(
+
+commit 98af1b36000b8ab882da12d4b7ffb3761864841f
+Author: Sattvik Kansal <sk2278@cornell.edu>
+Date:   Tue Dec 1 23:53:52 2015 -0500
+
+    dist_to_win fixed yet again with correct bounds
+
+commit e4567b0a718d71539ad0dea9c935a89d4d6bc7d7
+Merge: 36c897c 84ff386
+Author: Sattvik Kansal <sk2278@cornell.edu>
+Date:   Tue Dec 1 23:39:19 2015 -0500
+
+    Merge branch 'master' of https://github.com/gharrma/quoridor
+
+commit 36c897c2f59a8c210d727aba35250635808b1017
+Author: Sattvik Kansal <sk2278@cornell.edu>
+Date:   Tue Dec 1 23:39:16 2015 -0500
+
+    remove magic numbers from ai.ml
+
+commit 84ff386ecf7667187de003cbd997c94dcd663601
+Author: victoreis <vor3@cornell.edu>
+Date:   Tue Dec 1 23:30:02 2015 -0500
+
+    minimax
+
+commit 658070ef40aea7d23db11a18e390f39f69c1de15
+Author: victoreis <vor3@cornell.edu>
+Date:   Tue Dec 1 23:26:40 2015 -0500
+
+    minimax
+
+commit 08cbebb3dc1d31897ef8b85582db483b62f92685
+Author: Sattvik Kansal <sk2278@cornell.edu>
+Date:   Tue Dec 1 23:24:48 2015 -0500
+
+    fix winning locations in dist_to_win in ai
+
+commit 800e71ecb3853f20c94d90378fd363267a0c12eb
+Author: Sattvik Kansal <sk2278@cornell.edu>
+Date:   Tue Dec 1 23:22:04 2015 -0500
+
+    fixed dist_to_win in ai.ml
+
+commit c7ea90aa451397394f878eeeed8a1618f5ba9356
+Author: victoreis <vor3@cornell.edu>
+Date:   Tue Dec 1 23:06:26 2015 -0500
+
+    minimax
+
+commit 87bc13e815ea78a71450f9220a18c820b91b0aa1
+Author: victoreis <vor3@cornell.edu>
+Date:   Tue Dec 1 22:52:25 2015 -0500
+
+    minimax
+
+commit 535f491dfb399e450b1b347abc184db8e17bc02d
+Author: Sattvik Kansal <sk2278@cornell.edu>
+Date:   Tue Dec 1 22:45:09 2015 -0500
+
+    dist_to_win replaces dist_to_locn
+
+commit e32bc07969dd4a16c3eda6802abde037ca48661e
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Tue Dec 1 20:38:31 2015 -0500
+
+    Implement get_valid_moves
+
+commit a5fa6319c699507be908318efe426a9e11138cfa
+Author: Sattvik Kansal <sk2278@cornell.edu>
+Date:   Tue Dec 1 20:35:22 2015 -0500
+
+    distance_to_pos spec removed ai.mli, merge changes to ai.ml
+
+commit 9d939bbff27d769a46fd0411ffbcb172d324d646
+Merge: 4e4965a 13cb9cd
+Author: Sattvik Kansal <sk2278@cornell.edu>
+Date:   Tue Dec 1 20:33:02 2015 -0500
+
+    Merge branch 'master' of https://github.com/gharrma/quoridor
+
+commit 4e4965aaa53bab84935af291f8f327f1511ff3dc
+Author: Sattvik Kansal <sk2278@cornell.edu>
+Date:   Tue Dec 1 20:32:58 2015 -0500
+
+    distance_to_pos implemented in ai.ml
+
+commit 13cb9cd4c0d86fe9a5c5797a93b174d8745d33b4
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Tue Dec 1 19:20:39 2015 -0500
+
+    Factor out commit_move from validate_move for use in AI
+
+commit 373207b85d4e9e088eed044ba0d6932a9a506254
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Tue Dec 1 18:38:28 2015 -0500
+
+    AI stubs added; implementation soon
+
+commit 883fa8813ea9a92632a21a1cc77446e93232f6b3
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Tue Dec 1 13:16:26 2015 -0500
+
+    Fixed lag and multiple key presses
+
+commit c83b1673e6f5882d0bc847d66d7f2a35f403b4bd
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Tue Dec 1 10:55:49 2015 -0500
+
+    Organized file structure to give images their own directory
+
+commit ae7afc09703fa08c3a9b0c2c2b080128956567c1
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Mon Nov 30 14:33:37 2015 -0500
+
+    Fix gui file names and added graphicsRipper.mli
+
+commit 0ef30531ec108a415d3e276ce1dae97967bee840
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Sun Nov 29 15:48:43 2015 -0500
+
+    Clean up gui files, only style changes remain
+
+commit 0d11d59874ffcc2ba4b731e123a07813682d26c6
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Sun Nov 29 15:37:21 2015 -0500
+
+    Gui is Done. (Unless we add save/load)
+
+commit 4c12f7035d2b317c9791bd2e6fe02c37c49f2fb9
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Sun Nov 29 12:38:48 2015 -0500
+
+    Color/Ai player customization, changed model ai_move to match signature
+
+commit dec7a212d3b688cff1e1d4267762ef085eedc344
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Sat Nov 28 19:56:15 2015 -0500
+
+    Player code partial
+
+commit 573895667f1fbd9f4fb701ca8c71ca34b03cfc52
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Sat Nov 28 19:50:07 2015 -0500
+
+    Player Customization images
+
+commit 6824d28e11982edff356f160cf1bc468626c000b
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Sat Nov 28 18:50:46 2015 -0500
+
+    Add HowToPlay
+
+commit fbfff6420dc7ff1e3c598689695dc48b6b991cdf
+Author: victoreis <vor3@cornell.edu>
+Date:   Sat Nov 28 17:09:40 2015 -0500
+
+    fixed out of bounds and wall placement
+
+commit 7216aed2e6e65b41da08772e1dd7442aa14c2985
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Sat Nov 28 16:45:02 2015 -0500
+
+    Fixed synch bug
+
+commit 3665414d80387adaa02f387a196e1b6b0c7586b7
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Sat Nov 28 02:49:58 2015 -0500
+
+    fixed player 3/4 bug
+
+commit a790f0163521e1851f2e1f1d12f1fcd832ffd90d
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Thu Nov 26 23:30:18 2015 -0500
+
+    Board updated for model
+
+commit 7ab64a76c93d84257bcd587919c9e267e8309660
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Thu Nov 26 21:55:25 2015 -0500
+
+    remade board to make in a better way, have to a lot of the wall gui though
+
+commit 055571650743b6e307f244f81bc6964a5e30cb89
+Author: victoreis <vor3@cornell.edu>
+Date:   Thu Nov 26 17:59:41 2015 -0500
+
+    fixed diagonal jumping
+
+commit d7bd07c4067b0b7dd6ef86d61ce16962ecd8f5b3
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Thu Nov 26 15:51:07 2015 -0500
+
+    fixed constraint for function call
+
+commit 0bac673d8c6d30bab602704ae67c639f549ea7ce
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Thu Nov 26 15:41:04 2015 -0500
+
+    Fixed edge errors, some validate errors persist
+
+commit 609e498a582f23a2fc91dcb22a6d9406bda42dd6
+Merge: d19c152 054d2f3
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Thu Nov 26 15:31:24 2015 -0500
+
+    fix merge, buggy wall validate
+
+commit d19c152a037553f0a80dbe838d0948268d64dbe9
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Thu Nov 26 15:29:17 2015 -0500
+
+    fixed merge conflict, overflow fixed, some weird invalid moves and allows invalid moves
+
+commit 054d2f3fa4d0c2861f95138962aa8122ad6039fb
+Author: victoreis <vor3@cornell.edu>
+Date:   Thu Nov 26 15:17:42 2015 -0500
+
+    no stack overflow pls
+
+commit c456b3e86c8af966b95b68fb04558aa20d4ab9cf
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Thu Nov 26 04:02:26 2015 -0500
+
+    Fixed signature and model validate as addressed, also fixed player position initializations (they were reversed), gui validation
+
+commit 8a277a2ba02dad0426d56212c75b155703c6e790
+Author: victoreis <vor3@cornell.edu>
+Date:   Thu Nov 26 02:57:35 2015 -0500
+
+    move validate now updates board
+
+commit 5ae0dc7dbd5eff068023c99de0cc3b31ccf6ec5c
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Thu Nov 26 01:51:02 2015 -0500
+
+    GraphicsRip +Tint, board2 before move validation test
+
+commit 7881e04fd8d4a233e2213615bf86a3ae3acdee5d
+Author: victoreis <vor3@cornell.edu>
+Date:   Thu Nov 26 00:42:35 2015 -0500
+
+    move validate
+
+commit 96c730eb6d7ac7c4245ad07e175b1debb4b2295b
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Thu Nov 26 00:09:51 2015 -0500
+
+    Add ai.ml
+
+commit f758d8e5ed5c37e996302169f48a23e4d6db3a47
+Author: victoreis <vor3@cornell.edu>
+Date:   Wed Nov 25 19:20:47 2015 -0500
+
+    move validate part 1
+
+commit f441c4aac1aa2e9389153babb79503a93df661fe
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Wed Nov 25 18:14:30 2015 -0500
+
+    Add diagnostic print_game function
+
+commit 6e1055655864b98b1fc8a51a7ede16dddd05a63c
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Wed Nov 25 17:57:17 2015 -0500
+
+    Make board type public, add player ids to model
+
+commit cd6f07c1ba09271ff3d69a3464bddfbcc57b376e
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Wed Nov 25 16:41:43 2015 -0500
+
+    Start model.ml
+
+commit 07170d503ec96de6c93488267a25758f9eb96fff
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Sat Nov 21 10:20:23 2015 -0500
+
+    Fancy new stuff, UI
+
+commit ef0284006c848c24e00111cd6aa4ebdf7e0f6b50
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Tue Nov 17 17:16:13 2015 -0500
+
+    Board skeleton pretty much done
+
+commit aae06d33526783ab20af3f2143d3fce6912b9bef
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Tue Nov 17 17:14:52 2015 -0500
+
+    Board skeleton pretty much done
+
+commit 9cd77c09a8966999cd8170ca8669ed6cfd8f636d
+Author: Tyler Thompson <thompsontylerw@gmail.com>
+Date:   Tue Nov 17 13:54:33 2015 -0500
+
+    Basic board graphics
+
+commit d8ba2c77423a64d9f8c88052776cf9bce640b117
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Thu Nov 12 21:00:35 2015 -0500
+
+    Finalize design submission
+
+commit 4a37c9ed0a2212ce8650e55a4eba6aa61139546a
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Thu Nov 12 17:41:26 2015 -0500
+
+    First draft of .mli files; improve model
+
+commit 6e1b32478e1e68e7bc71b1e5d4aeac7d17e0b19a
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Thu Nov 5 19:05:19 2015 -0500
+
+    Add .gitignore and .merlin
+
+commit ea648efc8ff07acabbf48acd86f57264c5bd9313
+Author: Matthew Gharrity <mjg355@cornell.edu>
+Date:   Thu Nov 5 18:41:07 2015 -0500
+
+    Initial commit
